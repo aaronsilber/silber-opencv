@@ -1,5 +1,3 @@
-import java.awt.Color;
-import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,7 +23,7 @@ public class ColorBlobDetector {
     private Mat mSpectrum = new Mat();
     private List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
 
-    // Cache
+    // some temporary variables
     Mat mPyrDownMat = new Mat();
     Mat mHsvMat = new Mat();
     Mat mMask = new Mat();
@@ -33,10 +31,16 @@ public class ColorBlobDetector {
     Mat mHierarchy = new Mat();
 
     public void setColorRadius(Scalar radius) {
-        mColorRadius = radius;
+        mColorRadius = radius; //setter for color radius
     }
 
-    public void setHsvColor(Scalar hsvColor) {
+    public void setHsvColor(Scalar hsvColor)
+    {
+    	//my memory is so backwards I just have to swap HSV/VSH and RGB/BGR/RGBA until
+    	//things make enough sense
+    	//sorry
+    	//-aaron
+    	
         double minH = (hsvColor.val[0] >= mColorRadius.val[0]) ? hsvColor.val[0]-mColorRadius.val[0] : 0;
         double maxH = (hsvColor.val[0]+mColorRadius.val[0] <= 255) ? hsvColor.val[0]+mColorRadius.val[0] : 255;
 
@@ -59,6 +63,7 @@ public class ColorBlobDetector {
             spectrumHsv.put(0, j, tmp);
         }
 
+        //convert to RGB
         Imgproc.cvtColor(spectrumHsv, mSpectrum, Imgproc.COLOR_HSV2RGB_FULL, 4);
     }
 
@@ -71,42 +76,33 @@ public class ColorBlobDetector {
     }
 
     public void process(Mat rgbaImage) {
-    	Mat tmp2 = new Mat();
+    	Mat tmp2 = new Mat(); //a temporary variable for processing things
+    	
+    	//slow bilateral filter (commented out)
     	//Imgproc.bilateralFilter(rgbaImage, tmp2, 5, 90, 90);
-    	Imgproc.GaussianBlur(rgbaImage, tmp2, new Size(15,15), 2);
-    	//rgbaImage=tmp2;
-    	//Imgproc.bil
-    	//tmp2=rgbaImage;
-    	//Scalar ORANGE_MIN = new Scalar(18, 40, 90);
-    		//	Scalar ORANGE_MAX = new Scalar(27, 255, 255);
-    			//Scalar COLOR_MIN = mLowerBound;
-    		//	Scalar COLOR_MAX = mUpperBound;
-    	    	//Imgproc.cvtColor(rgbaImage, tmp2, Imgproc.COLOR_RGB2HSV_FULL);
-    	//Core.inRange(tmp2, COLOR_MIN,COLOR_MAX, rgbaImage);
-
+    	
+    	Imgproc.GaussianBlur(rgbaImage, tmp2, new Size(15,15), 2); //gaussian kernel filter (blur)
     			
-    	
-    	//contour detection commented out for testing
-    	
-        //Imgproc.pyrDown(rgbaImage, mPyrDownMat);
-        ///Imgproc.pyrDown(mPyrDownMat, mPyrDownMat);
-
-        Imgproc.cvtColor(tmp2, mHsvMat, Imgproc.COLOR_RGB2HSV_FULL);
-
-        Core.inRange(mHsvMat, mLowerBound, mUpperBound, mMask);
-        //rgbaImage=mMask;
-        //mMask = rgbaImage;
+    	//my computer is fast enough to deal with full-size video
+    	//you may need to use pyrDown once or twice otherwise
+        //ie: Imgproc.pyrDown(rgbaImage, mPyrDownMat);
         
-        Imgproc.dilate(mMask, mDilatedMask, new Mat());
-        
-        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        Imgproc.cvtColor(tmp2, mHsvMat, Imgproc.COLOR_RGB2HSV_FULL); //convert RGB to hsv colorspace
 
+        Core.inRange(mHsvMat, mLowerBound, mUpperBound, mMask); //threshold between lower/upper HSV bounds
+        
+        Imgproc.dilate(mMask, mDilatedMask, new Mat()); //dilate: reduce "holes" in matte
+        
+        List<MatOfPoint> contours = new ArrayList<MatOfPoint>(); //initialize contour holding variable
+
+        //find contours from dilated mask
         Imgproc.findContours(mDilatedMask, contours, mHierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
         
-        MatOfPoint largestContour = null;
+        MatOfPoint largestContour = null; //temp variable for finding largest contour
+        Imgproc.cvtColor(mMask, rgbaImage, Imgproc.COLOR_GRAY2BGR); //only needed if you want the "swatch" to be displayed later on.
+        //OTHERWISE, it is redundant and pointless/inefficient
         
-        Imgproc.cvtColor(mMask, rgbaImage, Imgproc.COLOR_GRAY2BGR);
-        // Find max contour area
+        //iterate through all contours, determine maximum area
         double maxArea = 0;
         Iterator<MatOfPoint> each = contours.iterator();
         while (each.hasNext()) {
@@ -119,116 +115,43 @@ public class ColorBlobDetector {
             }
         }
 
-        // Filter contours by area and resize to fit the original image size
-        
+        //iterate through contours and save all that meet area requirements
         mContours.clear();
         each = contours.iterator();
-        while (each.hasNext()) {
-            MatOfPoint contour = each.next();
-            if (Imgproc.contourArea(contour) > mMinContourArea*maxArea) {
-                //Core.multiply(contour, new Scalar(4,4), contour);
-                mContours.add(contour);
+        while (each.hasNext())
+        {
+        	MatOfPoint contour = each.next();
+            if (Imgproc.contourArea(contour) > mMinContourArea*maxArea)
+            {
+                mContours.add(contour); //add contour to mContours
             }
         }
         
-        //System.out.println("count: " + mContours.size());
-        
-        Moments moments = new Moments();
-        if (largestContour != null)
+        Moments moments = new Moments(); //initalize Moments holder
+        if (largestContour != null) //sanity check?
         {
-        moments = org.opencv.imgproc.Imgproc.moments(largestContour,false);
-        Point2D.Float mass = new Point2D.Float();
-        mass = new Point2D.Float((float) (moments.get_m10()/moments.get_m00()), (float) (moments.get_m01()/moments.get_m00()));
-    	
-        /*
-      /// Get the moments
-        Moments[] mu = new Moments[contours.size()];
-        //vector<Moments> mu(contours.size() );
-        
-        for( int i = 0; i < contours.size(); i++ )
-        {
-        	//mu[i] = moments( contours[i], false );
-        	mu[i] = org.opencv.imgproc.Imgproc.moments( contours.get(i), false);
-        }
-
-        ///  Get the mass centers:
-        //Point2D point = new Point2D();
-        Point2D.Float mc[] = new Point2D.Float[contours.size()];
-        //vector<Point2f> mc( contours.size() );
-        //org.opencv.imgproc.Imgproc.
-        for( int i = 0; i < contours.size(); i++ )
-           {
-        	//mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
-        	mc[i] = new Point2D.Float((float) (mu[i].get_m10()/mu[i].get_m00()), (float) (mu[i].get_m01()/mu[i].get_m00()));
-        	System.out.println(mc[i].toString());
-           }*/
-        
-        /// Calculate the area with the moments 00 and compare with the result of the OpenCV function
-        //System.out.println("Info: Area and Contour Length \n");
-        /*for( int i = 0; i< contours.size(); i++ )
-           {
-             //System.out.println(" * Contour[%d] - Area (M_00) = %.2f - Area OpenCV: %.2f - Length: %.2f \n", i, mu[i].m00, contourArea(contours[i]), arcLength( contours[i], true ) );
-            System.out.println("Contour[" + i + "] - Area " + mu[i].get_m00()); 
-        	//Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-             //drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
-             //circle( drawing, mc[i], 4, color, -1, 8, 0 );
-           }
-        */
-        
-        /*
-        Iterator<Contour> each2 = contours.iterator();
-        while (each2.hasNext()) {
-            MatOfPoint wrapper = each.next();
-            double area = Imgproc.contourArea(wrapper);
-            
-        }*/
-        
-        //System.out.println(mc.toString());
-     // where I(x,y) is the intensity of the pixel (x, y).
-        /*org.opencv.imgproc.Imgproc.
-        double momX10 = cvGetSpatialMoment(moments, 1, 0); // (x,y)
-        double momY01 = cvGetSpatialMoment(moments, 0, 1);// (x,y)*/
-        //if (mc.length > 0)
-        //if (true)
-        //{
-        	//we want to ONLY log:
-        	// the LARGEST contour's mass center
-        	// and 
+        	moments = org.opencv.imgproc.Imgproc.moments(largestContour,false); //compute moments
+        	
+        	//compute the mass center
+        	Point2D.Float mass = new Point2D.Float();
+        	mass = new Point2D.Float((float) (moments.get_m10()/moments.get_m00()), (float) (moments.get_m01()/moments.get_m00()));
         	org.opencv.core.Point intpoint = new org.opencv.core.Point((int) mass.getX(), (int) mass.getY());
+        	
+        	//draw a crosshair
         	Core.line(rgbaImage,new org.opencv.core.Point((int) intpoint.x-8,(int) intpoint.y), new org.opencv.core.Point((int) intpoint.x+8,(int) intpoint.y), new Scalar(0,0,255,255),2);
         	Core.line(rgbaImage,new org.opencv.core.Point((int) intpoint.x,(int) intpoint.y-8), new org.opencv.core.Point((int) intpoint.x,(int) intpoint.y+8), new Scalar(0,0,255,255),2);
-        	
-        	//Core.line
-        	//Core.line
         	Core.circle(rgbaImage, intpoint, 5, new Scalar(255,0,0,255));
+        	
+        	//assemble a data frame to log
         	DataFrame newframe = new DataFrame(System.nanoTime(), Main.backthread.frame, intpoint);
         	if (Main.logger.getLogging())
         	{
-        		Main.logger.addFrame(newframe);
+        		Main.logger.addFrame(newframe); //log the frame
         	}
-        	else
-        	{
-        		//System.out.println("count: " + mContours.size());
-        	}
-        	//System.out.println(Main.logger.count());
-        	//System.out.println(mc[0].toString());
-        	//System.out.println(Main.logger.getCSV());
-        //}
-        
-        //array_
-        
-        /*if (contours.size() > 1)
-        {
-        	System.out.println("Too many contours! " + contours.size() + " detected.");
-        }
-        else
-        {
-        	System.out.println("Locked on. " + contours.size() + " contour.");
-        }*/
-        }
+    	}
     }
 
     public List<MatOfPoint> getContours() {
-        return mContours;
+        return mContours; //getter for contours
     }
 }

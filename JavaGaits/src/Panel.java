@@ -3,44 +3,40 @@
  // But OpenCV for java doesn't have the method "imshow", so, we got to use  
  // java for that (drawImage) that uses Image or BufferedImage.  
  // So, how to go from one the other... Here is the way...  
- import java.awt.*;  
- import java.awt.image.BufferedImage;  
- import javax.swing.*;  
- import org.opencv.core.Mat;  
- import org.opencv.highgui.VideoCapture;  
- public class Panel extends JPanel{  
-   private static final long serialVersionUID = 1L;  
-   private BufferedImage image;  
-   // Create a constructor method  
-   public Panel(){  
-     super();  
-   }  
-   public BufferedImage getimage(){  
-     return image;  
-   }  
-   public void setimage(BufferedImage newimage){  
-     image=newimage;  
-     return;  
-   }  
-   /**  
-    * Converts/writes a Mat into a BufferedImage.  
-    *  
-    * @param matrix Mat of type CV_8UC3 or CV_8UC1  
-    * @return BufferedImage of type TYPE_3BYTE_BGR or TYPE_BYTE_GRAY  
-    */  
-   public void paintComponent(Graphics g){  
-      BufferedImage temp=getimage();  
-      if (temp != null)
-      {
-    	  g.drawImage(temp,0,0,temp.getWidth(),temp.getHeight(), this);  
-      }
-      else
-      {
-    	  g.fillRect(0, 0, 50,50);
-      }
-   }  
-   /*public static void main(String arg[]){  
-    // Load the native library.  
-    //System.loadLibrary("opencv_java246");   
-   }*/
- }  
+import java.awt.*;  
+import java.awt.image.BufferedImage;  
+import javax.swing.*;  
+
+public class Panel extends JPanel
+{  
+	private static final long serialVersionUID = 4010699211556699539L; //make Eclipse happy
+	private BufferedImage image;  //store the current image here
+	
+	public Panel()
+	{  
+		super();  //call super's constructor
+	}
+	
+	public BufferedImage getImage()
+	{  
+		return image; //getter for private image
+	}  
+	
+	public void setImage(BufferedImage newimage)
+	{  
+		image = newimage;  //setter for private image
+	}  
+	
+	public void paintComponent(Graphics g)
+	{  
+		BufferedImage temp = getImage(); //temp variable of current image
+		if (temp != null)
+		{
+			g.drawImage(temp,0,0,temp.getWidth(),temp.getHeight(), this); //draw image at (0,0) full size  
+		}
+		else
+		{
+			g.fillRect(0, 0, 50,50); //well, a 50x50 square beats null stuff lying around, at least.
+		}
+	}  
+}  

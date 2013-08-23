@@ -1,9 +1,7 @@
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -14,18 +12,16 @@ import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
 public class VideoThread implements Runnable {
-	  private static boolean              mIsColorSelected = false;
 	  private static Mat                  mRgba;
 	  public static Scalar               mBlobColorRgba;
 	  public static Scalar               mBlobColorHsv;
 	  private static ColorBlobDetector    mDetector;
 	  private static Mat                  mSpectrum;
-	  private static Size                 SPECTRUM_SIZE;
 	  private static Scalar               CONTOUR_COLOR;
 	  
 	  int frame= 0;
 	  
-	    VideoCapture capture = new VideoCapture(1);  
+	  public VideoCapture capture = new VideoCapture();
 	  
 	Panel raw;
 	Panel out;
@@ -34,6 +30,17 @@ public class VideoThread implements Runnable {
 	Thread thread;
 	Mat webcam_image = new Mat();
 	Mat thresh_image = new Mat();
+	
+	synchronized void swapDevice(int index)
+	{
+		//capture.
+		if (capture != null)
+		{
+			capture.release();
+		}
+		capture.open(index);
+	}
+	
 	VideoThread(Panel raw, Panel out, JFrame inframe, JFrame outframe) {
 	    this.raw = raw;
 	    this.out = out;
@@ -42,26 +49,25 @@ public class VideoThread implements Runnable {
 	    // Create a new, second thread
 	    thread = new Thread(this, "Demo Thread");
 	    System.out.println("Child thread: " + thread);
-	    thread.start(); // Start the thread
 	    mRgba = new Mat(400, 400, CvType.CV_8UC4);
         mDetector = new ColorBlobDetector();
         mSpectrum = new Mat();
         mBlobColorRgba = new Scalar(255,151,54);
         mBlobColorHsv = new Scalar(105.52,201,255); //79214, 89, 
-        SPECTRUM_SIZE = new Size(200, 64);
+        new Size(200, 64);
         CONTOUR_COLOR = new Scalar(255,0,255,255);
 	  }
 
 	void setBlobColor(Scalar Rgba, Scalar Hsv)
 	{
-		this.mBlobColorRgba = Rgba;
-		this.mBlobColorHsv = Hsv;
+		VideoThread.mBlobColorRgba = Rgba;
+		VideoThread.mBlobColorHsv = Hsv;
 		mDetector.setHsvColor(mBlobColorHsv);
 	}
 
 	public Scalar getHsvBlobColor()
 	{
-		return this.mBlobColorHsv;
+		return VideoThread.mBlobColorHsv;
 	}
 	
 	  public static BufferedImage matToBufferedImage(Mat matrix) {  
@@ -94,7 +100,16 @@ public class VideoThread implements Runnable {
 		   }  
 	
 	  @Override
-	  public void run() {
+	  synchronized public void run() {
+		  try
+		  {
+				//changeDevice(getDevice());
+				capture = new VideoCapture(Main.settings.getDevice());  
+		  }
+		  catch (Exception ex)
+		  {
+			  System.out.println("Caught a camera exception (fatal?) " + ex.toString());
+		  }
 		  while(true)
 		  {
 			  	//Mat webcam_image=new Mat();
@@ -112,7 +127,7 @@ public class VideoThread implements Runnable {
 			           inframe.setSize(webcam_image.width(),webcam_image.height());  
 			           outframe.setSize(webcam_image.width(),webcam_image.height());
 			           temp=matToBufferedImage(webcam_image);  
-			           raw.setimage(temp);  
+			           raw.setImage(temp);  
 			           raw.repaint();  
 			           
 			           //temp=matToBufferedImage(thresh_image);
@@ -136,7 +151,7 @@ public class VideoThread implements Runnable {
 			           
 			           //org.opencv.imgproc.Imgproc.threshold(webcam_image, thresh_image, 120, 250, org.opencv.imgproc.Imgproc.THRESH_BINARY);
 			           //temp=matToBufferedImage(thresh_image);
-			           out.setimage(temp);
+			           out.setImage(temp);
 			           out.repaint();
 			           //org.opencv.imgproc.Imgproc.
 			         }  

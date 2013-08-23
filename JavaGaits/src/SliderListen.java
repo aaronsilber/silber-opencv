@@ -1,3 +1,13 @@
+/*
+ * NOTE!!
+ * We don't use sliders any more.
+ * 
+ * Too problematic.
+ * 
+ * This class is obsolete.
+ * 
+ */
+
 import java.awt.Color;
 
 import javax.swing.JSlider;

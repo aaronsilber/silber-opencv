@@ -1,50 +1,42 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
-import org.opencv.imgproc.Imgproc;
-
 
 public class DataLogger {
-	private DataFrame lastFrame;
-	private ArrayList<DataFrame> backend = new ArrayList();
-	//private MatOfPoint2f points = new MatOfPoint2f();
-	long startTime = 0;
-	boolean isLogging = false;
-	boolean ctg = true;
+	private DataFrame lastFrame; //previous frame logged, a back-cache
+	private ArrayList<DataFrame> backend = new ArrayList<DataFrame>(); //holds the data!
+	long startTime = 0; //absolute time logging began
+	boolean isLogging = false; //logging flag
+	boolean ctg = true; //attempt at crude thread-locking
 	
-	public DataLogger() {
-		// TODO Auto-generated constructor stub
-		startTime = System.nanoTime();
+	public DataLogger()
+	{
+		startTime = System.nanoTime(); //record nanoTime datalogger initialized
 	}
+	
 	public void addFrame(DataFrame frame)
 	{
-		ctg = false;
-		frame.nanotime = frame.nanotime - startTime;
-		if (lastFrame != null)
+		ctg = false; //"lock" things
+		frame.nanotime = frame.nanotime - startTime; //assign time, relative to creation of logger
+		if (lastFrame != null) //sanity
 		{
+			//compute distance from last datapoint
 			float prevdist = lastFrame.getDistance();
-			
 			Point pt0 = lastFrame.getPoint();
 			double x0 = pt0.x;
 			double y0 = pt0.y;
-			
 			Point pt = frame.getPoint();
 			double x1 = pt.x;
 			double y1 = pt.y;
-			
-			//System.out.println(pt0.toString() + pt.toString());
 			double dist = prevdist + Math.sqrt(Math.pow(x1-x0,2)+Math.pow(y1-y0,2));
-			//System.out.println(dist);
 			
+			//assign this distance to the new frame
 			frame.setDistance((float) dist);
 		}
-		backend.add(frame);
-		lastFrame = frame;
-		ctg = true;
-		//points.push_back(new Mat());
+		backend.add(frame); //add to data list
+		lastFrame = frame; //store the frame for later...
+		ctg = true; //"unlock" things
 	}
 	
 	public int count()
@@ -66,8 +58,13 @@ public class DataLogger {
 	{
 		while(!ctg)
 		{
-		
+			//this may be the most hacky way to "lock" the thread
+			//and it doesn't work most of the time
+			//call this function a couple of times
+			//and it might behave properly
 		}
+		
+		//initialize a StringBuilder and iteratively compose CSV lines
 		StringBuilder stringy = new StringBuilder();
         Iterator<DataFrame> each = backend.iterator();
         while (each.hasNext())
@@ -76,6 +73,7 @@ public class DataLogger {
             stringy.append(wrapper.getNanotime() + "," + wrapper.getFrame() + "," + wrapper.getPoint().x + "," + wrapper.getPoint().y + "," + wrapper.getDistance() + "\n");
         }
         
+        //return full CSV
         return stringy.toString();
 	}
 

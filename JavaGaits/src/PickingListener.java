@@ -6,31 +6,42 @@ import org.opencv.core.Scalar;
 
 public class PickingListener implements MouseListener {
 
-	public PickingListener() {
-		//constructor
+	public PickingListener()
+	{
+		//(empty) constructor
 	}
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		//we wthis is what wa te
-		//System.out.println("clikced");
-		System.out.println("clicked on " + e.getX() + ", " + e.getY());
-		//determine what freaking color that is
-		BufferedImage clone = Main.inpanel.getimage();
+		System.out.println("clicked on " + e.getX() + ", " + e.getY()); //debug
+
+		//determine what color was clicked on: grab frame and get the pixel data
+		BufferedImage clone = Main.inpanel.getImage();
 		Color color = new Color(clone.getRGB(e.getX(), e.getY()),true);
 		float[] hsvf = new float[3];
 		Color.RGBtoHSB(color.getRed(),color.getGreen(),color.getBlue(),hsvf);
-		System.out.println(color.toString());
-		//System.out.println("HSV: " + hsv[0]*256 + ", " + hsv[1]*256 + ", " + hsv[2]*256);
-		//Scalar hsv = new Scalar(hsvf[0]*256, hsvf[1]*256, hsvf[2]*256);
+		
+		System.out.println(color.toString()); //debug
+		
+		//create hsv and rgba equivalents (correct?)
 		Scalar hsv = new Scalar(hsvf[0]*180, hsvf[1]*255, hsvf[2]*255);
 		Scalar rgba = new Scalar(color.getBlue(),color.getGreen(),color.getRed());
-		System.out.println("HSV selected: " + hsv.toString());
+		
+		System.out.println("HSV selected: " + hsv.toString()); //debug
+		
+		//set this as the new color
 		Main.backthread.setBlobColor(rgba, hsv);
-		Main.settings.updateSliders(hsv);
-		//ideoThrea
+		
+		//we don't use sliders any more
+		//Main.settings.updateSliders(hsv);
 	}
 
+	/*
+	 * these functions must be overridden
+	 * even if they are completely empty
+	 * what a bummer
+	 * :P
+	 */
 	@Override
 	public void mouseEntered(MouseEvent e) { }
 
