@@ -21,8 +21,6 @@ public class VideoThread implements Runnable {
 	  
 	  int frame= 0;
 	  
-	  public VideoCapture capture = new VideoCapture();
-	  
 	Panel raw;
 	Panel out;
 	JFrame inframe;
@@ -34,11 +32,11 @@ public class VideoThread implements Runnable {
 	synchronized void swapDevice(int index)
 	{
 		//capture.
-		if (capture != null)
+		if (Main.capture != null)
 		{
-			capture.release();
+			Main.capture.release();
 		}
-		capture.open(index);
+		Main.capture.open(index);
 	}
 	
 	VideoThread(Panel raw, Panel out, JFrame inframe, JFrame outframe) {
@@ -52,8 +50,8 @@ public class VideoThread implements Runnable {
 	    mRgba = new Mat(400, 400, CvType.CV_8UC4);
         mDetector = new ColorBlobDetector();
         mSpectrum = new Mat();
-        mBlobColorRgba = new Scalar(255,151,54);
-        mBlobColorHsv = new Scalar(105.52,201,255); //79214, 89, 
+        mBlobColorRgba = new Scalar(255,123,26);
+        mBlobColorHsv = new Scalar(107.29,229,255); //79214, 89, 
         new Size(200, 64);
         CONTOUR_COLOR = new Scalar(255,0,255,255);
 	  }
@@ -100,11 +98,11 @@ public class VideoThread implements Runnable {
 		   }  
 	
 	  @Override
-	  synchronized public void run() {
+	  public void run() {
 		  try
 		  {
 				//changeDevice(getDevice());
-				capture = new VideoCapture(Main.settings.getDevice());  
+				Main.capture = new VideoCapture(Main.settings.getDevice());  
 		  }
 		  catch (Exception ex)
 		  {
@@ -115,12 +113,12 @@ public class VideoThread implements Runnable {
 			  	//Mat webcam_image=new Mat();
 			    
 			    BufferedImage temp;  
-			    
-			    if( capture.isOpened())  
+			   // capture.
+			    if( Main.capture.isOpened())  
 			     {  
 			      while( true )  
 			      {  
-			        capture.read(webcam_image);  
+			       Main.safeRead(webcam_image);  
 			        if( !webcam_image.empty() )  
 			         {  
 			        	frame++;
@@ -131,8 +129,8 @@ public class VideoThread implements Runnable {
 			           raw.repaint();  
 			           
 			           //temp=matToBufferedImage(thresh_image);
-			           mRgba = webcam_image;
-
+			           //mRgba = webcam_image;
+mRgba = webcam_image.clone();
 			           //if (mIsColorSel_ected) {
 			           mDetector.setHsvColor(mBlobColorHsv);
 			               mDetector.process(mRgba);

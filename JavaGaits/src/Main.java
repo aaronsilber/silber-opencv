@@ -1,7 +1,9 @@
 import javax.swing.JFrame;
 
 import org.opencv.core.Core;
+import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+import org.opencv.highgui.VideoCapture;
 
 class Main {
 	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); } //inline load opencv's native backend
@@ -13,11 +15,18 @@ class Main {
 	static public JFrame frame2 = new JFrame("Output"); //output Swing frame
 	static public SettingsFrame settings = new SettingsFrame("Settings"); //the settings Swing frame
 	static VideoThread backthread = new VideoThread(inpanel,outpanel,frame1,frame2); //initialize the worker thread for video
-  
+	
 	static public DataLogger logger = new DataLogger(); //initialize DataLogger for recording, well, data
   
 	static Scalar hsv = new Scalar(0,0,0); //not sure why this variable is here?
-  
+  static volatile public VideoCapture capture = new VideoCapture();
+  public static synchronized void safeRead(Mat dst)
+  {
+	  /*Mat tmp = new Mat();
+	  capture.read(tmp);
+	  dst = tmp.clone();*/
+	  capture.read(dst);
+  }
 	public static void main(String[] args)
 	{  
 		inpanel.addMouseListener(new PickingListener()); //listen for clicks + change target color

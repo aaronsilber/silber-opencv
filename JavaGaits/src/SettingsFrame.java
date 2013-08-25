@@ -1,11 +1,17 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 import org.opencv.core.Scalar;
 
@@ -26,11 +32,18 @@ public class SettingsFrame extends JFrame {
 	JSlider val = new JSlider(JSlider.HORIZONTAL, 0, 255, 90);
 	SliderListen vallisten = new SliderListen(SliderListen.roles.val);*/
 	
+	static public String savePath = "/home/silbernetic/Desktop/tests/";
+	static public String fullPath = "";
+	
+	JTextField testName = new JTextField("untitled");
+	
 	JButton dumpCSV = new JButton("Dump CSV");
 	
 	JButton startLog = new JButton("Start Logging");
 	
 	JButton startCamera = new JButton("Start Camera");
+	
+	JButton calibrate = new JButton("Capture Calibration");
 	
 	JButton test = new JButton("test");
 	
@@ -44,6 +57,7 @@ public class SettingsFrame extends JFrame {
 		this.setTitle(TITLE);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  
 		this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),BoxLayout.Y_AXIS));
+		this.getContentPane().add(Box.createVerticalStrut(2));
 		//this.getContentPane().setLayout(null);
 		//this.add(hue);
 		
@@ -57,6 +71,8 @@ petList.setSelectedIndex(4);
 petList.addActionListener(this);
 		 */
 		CameraChoice.setSelectedIndex(0);
+		
+		this.getContentPane().add(testName);
 		this.getContentPane().add(new JLabel("Camera Device"));
 		this.getContentPane().add(CameraChoice);
 		
@@ -69,21 +85,44 @@ petList.addActionListener(this);
                 //Execute when button is pressed
                 //Main.logger.setLogging(true);
                 //System.out.println("Starting camera");
+				if (!Files.exists(java.nio.file.FileSystems.getDefault().getPath(savePath + "/" + testName.getText() + "/"), LinkOption.NOFOLLOW_LINKS))
+				{
+					System.out.println("no project dir yet!");
+					try {
+						Files.createDirectory(java.nio.file.FileSystems.getDefault().getPath(savePath + "/" + testName.getText() + "/"));
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				fullPath = savePath + "/" + testName.getText() + "/";
 				if (!Main.backthread.thread.isAlive())
 				{
-			    Main.backthread.thread.start(); // Start the thread
+					Main.backthread.thread.start(); // Start the thread
 				}
 			   Main.frame1.setVisible(true);  
 			    Main.frame2.setVisible(true);  
             }
         });
 		
+		calibrate.addActionListener(new ActionListener() {
+			 
+			@Override
+            public void actionPerformed(ActionEvent e)
+            {
+                //Execute when button is pressed
+Calibration.calibrate();
+            }
+        });
+		
 		this.getContentPane().add(startCamera);
+		this.getContentPane().add(calibrate);
 		
 		CameraChoice.addActionListener(new ActionListener() {
 		    @Override
 		    public void actionPerformed(ActionEvent evt) {
 		        //changeDevice(getDevice());
+		    	//Calibration.calibrate();
 		    }
 		});
 		/*
@@ -97,6 +136,9 @@ petList.addActionListener(this);
 		this.getContentPane().add(sat);
 		this.getContentPane().add(vallabel);
 		this.getContentPane().add(val);*/
+		
+		this.getContentPane().add(Box.createVerticalGlue());
+		
 		
 		dumpCSV.addActionListener(new ActionListener() {
 			 
