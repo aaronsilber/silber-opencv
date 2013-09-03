@@ -12,13 +12,15 @@ public class DataLogger {
 	
 	public DataLogger()
 	{
-		startTime = System.nanoTime(); //record nanoTime datalogger initialized
+		startTime = System.currentTimeMillis(); //we use milliseconds now. nanoseconds are pointlessly large
+		//startTime = System.nanoTime(); //record nanoTime datalogger initialized
 	}
 	
 	public void addFrame(DataFrame frame)
 	{
 		ctg = false; //"lock" things
-		frame.nanotime = frame.nanotime - startTime; //assign time, relative to creation of logger
+		frame.setTime(frame.getTime() - startTime);
+		//int time = frame.time - startTime; //assign time, relative to creation of logger
 		if (lastFrame != null) //sanity
 		{
 			//compute distance from last datapoint
@@ -66,11 +68,12 @@ public class DataLogger {
 		
 		//initialize a StringBuilder and iteratively compose CSV lines
 		StringBuilder stringy = new StringBuilder();
+		stringy.append("time,frame,x_pixels,y_pixels,sqrt_dist\r\n");
         Iterator<DataFrame> each = backend.iterator();
         while (each.hasNext())
         {
             DataFrame wrapper = each.next();
-            stringy.append(wrapper.getNanotime() + "," + wrapper.getFrame() + "," + wrapper.getPoint().x + "," + wrapper.getPoint().y + "," + wrapper.getDistance() + "\n");
+            stringy.append(wrapper.getTime() + "," + wrapper.getFrame() + "," + wrapper.getPoint().x + "," + wrapper.getPoint().y + "," + wrapper.getDistance() + "\r\n");
         }
         
         //return full CSV

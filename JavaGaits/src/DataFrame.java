@@ -1,21 +1,21 @@
 import org.opencv.core.Point;
 
 public class DataFrame {
-long nanotime;
+long time;
 long frame;
 float distanceTraveled = 0.0F;
 org.opencv.core.Point point;
 	public DataFrame(long time, long frame, Point point) {
 		// TODO Auto-generated constructor stub
 		
-		this.nanotime = time;
+		this.time = time;
 		this.frame = frame;
 		this.point = point;
 	}
 	
-	public long getNanotime()
+	public long getTime()
 	{
-		return nanotime;
+		return time;
 	}
 	
 	public long getFrame()
@@ -38,9 +38,9 @@ org.opencv.core.Point point;
 		this.distanceTraveled = dist;
 	}
 
-	public void setNanotime(long time)
+	public void setTime(long time)
 	{
-		this.nanotime = time;
+		this.time = time;
 	}
 	
 	public void setFrame(long frame)

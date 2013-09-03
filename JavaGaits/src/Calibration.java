@@ -1,9 +1,12 @@
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 import org.opencv.core.Core;
@@ -207,15 +210,25 @@ public static void calibrate()
 		while (shot.empty())
 		{
 			Main.safeRead(shot);
-			MatOfInt params = new MatOfInt();
-			params.push_back(new Mat(org.opencv.highgui.Highgui.CV_IMWRITE_PNG_COMPRESSION));
-
-			params.push_back(new Mat(9));
-			//org.opencv.highgui.Highgui.imwrite()
-			org.opencv.highgui.Highgui.imwrite(Main.settings.fullPath + "calib.png", temp2, params);
 		}
-		//Main.capture.
 		BufferedImage temp=matToBufferedImage(shot);
+		/*
+		MatOfInt params = new MatOfInt();
+		params.push_back(new Mat(org.opencv.highgui.Highgui.CV_IMWRITE_PNG_COMPRESSION));
+
+		params.push_back(new Mat(9));*/
+		//org.opencv.highgui.Highgui.imwrite()
+		try {
+		    // retrieve image
+		    //BufferedImage bi = getMyImage();
+		    File outputfile = new File(Main.settings.fullPath + "calibration.png");
+		    ImageIO.write(temp, "png", outputfile);
+		} catch (IOException e) {
+		    
+		}
+		//org.opencv.highgui.Highgui.imwrite(Main.settings.fullPath + "calib.png", temp2, params);
+		//Main.capture.
+		///BufferedImage temp=matToBufferedImage(shot);
 		
 		calibpanel.setImage(temp);
 		framepanel.setSize(new Dimension(temp.getWidth(),temp.getHeight()));
@@ -323,7 +336,14 @@ public static void calibrate()
         temp=matToBufferedImage(temp3);
 		calibpanel.setImage(temp);
 		calibpanel.repaint();
-		//framepanel
+		try {
+		    // retrieve image
+		    //BufferedImage bi = getMyImage();
+		    File outputfile = new File(Main.settings.fullPath + "calibration-parsed.png");
+		    ImageIO.write(temp, "png", outputfile);
+		} catch (IOException e) {
+		    
+		}
 	}
 }
 }

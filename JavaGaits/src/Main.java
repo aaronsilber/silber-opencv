@@ -45,7 +45,7 @@ class Main {
 		frame2.setContentPane(outpanel);       
 	  
 		//initialize settings window size + display it
-		settings.setSize(400,400);
+		//settings.setSize(400,400);
 	  	settings.setVisible(true);
 	}  
 }

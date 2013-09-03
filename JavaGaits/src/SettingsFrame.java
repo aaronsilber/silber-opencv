@@ -1,10 +1,16 @@
+import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 
+import javax.imageio.ImageIO;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -14,7 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import org.opencv.core.Scalar;
-
+import javax.swing.*;
 public class SettingsFrame extends JFrame {
 	/**
 	 * 
@@ -35,11 +41,19 @@ public class SettingsFrame extends JFrame {
 	static public String savePath = "/home/silbernetic/Desktop/tests/";
 	static public String fullPath = "";
 	
+	Box theBox = Box.createVerticalBox();
+	
+	
+	JLabel header = new JLabel("JavaGaits v0.01");
+	JLabel subheader = new JLabel ("Aaron Silber, Creative Machines Lab");
+	
 	JTextField testName = new JTextField("untitled");
 	
-	JButton dumpCSV = new JButton("Dump CSV");
+	JButton dumpData = new JButton("Save Data");
 	
 	JButton startLog = new JButton("Start Logging");
+	
+	JButton stopLog = new JButton("Stop Logging");
 	
 	JButton startCamera = new JButton("Start Camera");
 	
@@ -49,6 +63,8 @@ public class SettingsFrame extends JFrame {
 	
 	String[] choices = {"0","1","2"};
 	
+	Component spacingStrut = Box.createVerticalStrut(20);
+	
 	public JComboBox<String> CameraChoice = new JComboBox<String>(choices);
 	SettingsFrame(String title)
 	{
@@ -56,8 +72,16 @@ public class SettingsFrame extends JFrame {
 		TITLE=title;
 		this.setTitle(TITLE);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  
-		this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),BoxLayout.Y_AXIS));
-		this.getContentPane().add(Box.createVerticalStrut(2));
+		//this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),BoxLayout.Y_AXIS));
+		//this.getContentPane().add(Box.createVerticalGlue());
+		theBox.add(spacingStrut);
+		theBox.add(Box.createVerticalGlue());
+		theBox.add(Box.createVerticalStrut(20));
+		header.setFont(new Font("Sans", Font.BOLD, 30));
+		subheader.setFont(new Font("Sans", Font.PLAIN, 10));
+		theBox.add(header);
+		theBox.add(subheader);
+		theBox.add(Box.createVerticalStrut(20));
 		//this.getContentPane().setLayout(null);
 		//this.add(hue);
 		
@@ -72,11 +96,12 @@ petList.addActionListener(this);
 		 */
 		CameraChoice.setSelectedIndex(0);
 		
-		this.getContentPane().add(testName);
-		this.getContentPane().add(new JLabel("Camera Device"));
-		this.getContentPane().add(CameraChoice);
+		theBox.add(testName);
+		theBox.add(new JLabel("Camera Device"));
+		theBox.add(CameraChoice);
+		theBox.add(spacingStrut);
 		
-		//this.getContentPane().add(new JLabel("Camera Device"));
+		//theBox.add(new JLabel("Camera Device"));
 		startCamera.addActionListener(new ActionListener() {
 			 
 			@Override
@@ -87,12 +112,30 @@ petList.addActionListener(this);
                 //System.out.println("Starting camera");
 				if (!Files.exists(java.nio.file.FileSystems.getDefault().getPath(savePath + "/" + testName.getText() + "/"), LinkOption.NOFOLLOW_LINKS))
 				{
-					System.out.println("no project dir yet!");
+					System.out.println("no project dir yet! creating...");
 					try {
 						Files.createDirectory(java.nio.file.FileSystems.getDefault().getPath(savePath + "/" + testName.getText() + "/"));
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
+					}
+				}
+				else
+				{
+					//Custom button text
+					Object[] options = {"Yes", "NO"};
+					int n = JOptionPane.showOptionDialog(Main.settings,
+						    "Test named '" + testName.getText() + "' exists."
+						    + "\r\nOverwrite this data?",
+						    "Overwrite existing data?",
+						    JOptionPane.YES_NO_OPTION,
+						    JOptionPane.WARNING_MESSAGE,
+						    null, options, options[1]);
+					if (n != JOptionPane.YES_OPTION)
+					{
+						testName.selectAll();
+						testName.requestFocus();
+						return;
 					}
 				}
 				fullPath = savePath + "/" + testName.getText() + "/";
@@ -115,8 +158,10 @@ Calibration.calibrate();
             }
         });
 		
-		this.getContentPane().add(startCamera);
-		this.getContentPane().add(calibrate);
+		theBox.add(startCamera);
+		theBox.add(spacingStrut);
+		theBox.add(calibrate);
+		theBox.add(spacingStrut);
 		
 		CameraChoice.addActionListener(new ActionListener() {
 		    @Override
@@ -130,23 +175,35 @@ Calibration.calibrate();
 		sat.addChangeListener(satlisten);
 		val.addChangeListener(satlisten);*/ //commented out because causing random data errors (synchronicity)
 		
-		/*this.getContentPane().add(huelabel);
-		this.getContentPane().add(hue);
-		this.getContentPane().add(satlabel);
-		this.getContentPane().add(sat);
-		this.getContentPane().add(vallabel);
-		this.getContentPane().add(val);*/
+		/*theBox.add(huelabel);
+		theBox.add(hue);
+		theBox.add(satlabel);
+		theBox.add(sat);
+		theBox.add(vallabel);
+		theBox.add(val);*/
 		
-		this.getContentPane().add(Box.createVerticalGlue());
-		
-		
-		dumpCSV.addActionListener(new ActionListener() {
+		dumpData.addActionListener(new ActionListener() {
 			 
 			@Override
             public void actionPerformed(ActionEvent e)
             {
                 //Execute when button is pressed
-                System.out.println(Main.logger.getCSV());
+                PrintStream out = null;
+				try {
+				    // retrieve image
+				    //BufferedImage bi = getMyImage();
+					String name = Main.settings.fullPath + "data.csv";
+				    File outputfile = new File(name);
+	                //System.out.println(Main.logger.getCSV());
+				    System.out.println("data saved to " + name);
+	                    out = new PrintStream(new FileOutputStream(name));
+	                    out.print(Main.logger.getCSV());
+				    //ImageIO.write(temp, "png", outputfile);
+				} catch (IOException e2) {
+				    
+				} finally {
+                    if (out != null) out.close();
+				}
             }
         });   
 		
@@ -161,11 +218,34 @@ Calibration.calibrate();
             }
         });
 		
-		this.getContentPane().add(dumpCSV);
-		this.getContentPane().add(startLog);
+		theBox.add(startLog);
+		theBox.add(spacingStrut);
+		stopLog.addActionListener(new ActionListener() {
+			 
+			@Override
+            public void actionPerformed(ActionEvent e)
+            {
+                //Execute when button is pressed
+                Main.logger.setLogging(false);
+                System.out.println("Logging has ceased");
+            }
+        });
 		
-		pack();
-		//this.getContentPane().add(hue);
+		theBox.add(stopLog);
+		theBox.add(spacingStrut);
+		theBox.add(dumpData);
+		theBox.add(spacingStrut);
+		theBox.add(Box.createVerticalGlue());
+		
+		this.add(theBox);
+		for (Component component : theBox.getComponents())
+		{
+				JComponent temp = (JComponent) component;
+				temp.setAlignmentX(CENTER_ALIGNMENT);
+		}
+		this.pack();
+		//pack();
+		//theBox.add(hue);
 	}
 	void changeDevice(int index)
 	{

@@ -143,7 +143,7 @@ public class ColorBlobDetector {
         	Core.circle(rgbaImage, intpoint, 5, new Scalar(255,0,0,255));
         	
         	//assemble a data frame to log
-        	DataFrame newframe = new DataFrame(System.nanoTime(), Main.backthread.frame, intpoint);
+        	DataFrame newframe = new DataFrame(System.currentTimeMillis(), Main.backthread.frame, intpoint);
         	if (Main.logger.getLogging())
         	{
         		Main.logger.addFrame(newframe); //log the frame
