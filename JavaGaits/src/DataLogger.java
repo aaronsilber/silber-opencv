@@ -13,14 +13,12 @@ public class DataLogger {
 	public DataLogger()
 	{
 		startTime = System.currentTimeMillis(); //we use milliseconds now. nanoseconds are pointlessly large
-		//startTime = System.nanoTime(); //record nanoTime datalogger initialized
 	}
 	
 	public void addFrame(DataFrame frame)
 	{
 		ctg = false; //"lock" things
 		frame.setTime(frame.getTime() - startTime);
-		//int time = frame.time - startTime; //assign time, relative to creation of logger
 		if (lastFrame != null) //sanity
 		{
 			//compute distance from last datapoint

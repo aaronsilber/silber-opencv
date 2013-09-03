@@ -13,20 +13,17 @@ class Main {
 	static Panel outpanel = new Panel(); //output content pane
 	static public JFrame frame1 = new JFrame("Input");  //input Swing frame
 	static public JFrame frame2 = new JFrame("Output"); //output Swing frame
-	static public SettingsFrame settings = new SettingsFrame("Settings"); //the settings Swing frame
+	static public SettingsFrame settings = new SettingsFrame("JavaGaits Controller"); //the settings Swing frame
 	static VideoThread backthread = new VideoThread(inpanel,outpanel,frame1,frame2); //initialize the worker thread for video
 	
 	static public DataLogger logger = new DataLogger(); //initialize DataLogger for recording, well, data
   
 	static Scalar hsv = new Scalar(0,0,0); //not sure why this variable is here?
-  static volatile public VideoCapture capture = new VideoCapture();
-  public static synchronized void safeRead(Mat dst)
-  {
-	  /*Mat tmp = new Mat();
-	  capture.read(tmp);
-	  dst = tmp.clone();*/
-	  capture.read(dst);
-  }
+	static volatile public VideoCapture capture = new VideoCapture();
+	public static synchronized void safeRead(Mat dst)
+	{
+		capture.read(dst);
+	}
 	public static void main(String[] args)
 	{  
 		inpanel.addMouseListener(new PickingListener()); //listen for clicks + change target color

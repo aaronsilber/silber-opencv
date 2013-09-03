@@ -27,44 +27,43 @@ public class Calibration {
 	static Scalar floorTileRgba = new Scalar(137,140,132);
 	private static Scalar mLowerBound = new Scalar(0);
     private static Scalar mUpperBound = new Scalar(0);
-    // Minimum contour area in percent for contours filtering
-    private static double mMinContourArea = 0.35;
     // Color radius for range checking in HSV color space
     private static Scalar mColorRadius = new Scalar(280,180,50);
     private static Mat mSpectrum = new Mat();
     //private List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
 	public static BufferedImage matToBufferedImage(Mat matrix) {  
-	     int cols = matrix.cols();  
-	     int rows = matrix.rows();  
-	     int elemSize = (int)matrix.elemSize();  
-	     byte[] data = new byte[cols * rows * elemSize];  
-	     int type;  
-	     matrix.get(0, 0, data);  
-	     switch (matrix.channels()) {  
-	       case 1:  
-	         type = BufferedImage.TYPE_BYTE_GRAY;  
-	         break;  
-	       case 3:  
-	         type = BufferedImage.TYPE_3BYTE_BGR;  
-	         // bgr to rgb  
-	         byte b;  
-	         for(int i=0; i<data.length; i=i+3) {  
-	           b = data[i];  
-	           data[i] = data[i+2];  
-	           data[i+2] = b;  
-	         }  
-	         break;  
-	       default:  
-	         return null;  
-	     }  
-	     BufferedImage image2 = new BufferedImage(cols, rows, type);  
-	     image2.getRaster().setDataElements(0, 0, cols, rows, data);  
-	     return image2;  
-	   }  
+			int cols = matrix.cols();  
+			int rows = matrix.rows();  
+			int elemSize = (int)matrix.elemSize();  
+			byte[] data = new byte[cols * rows * elemSize];  
+			int type;  
+			matrix.get(0, 0, data);  
+			switch (matrix.channels()) {  
+				case 1:  
+					type = BufferedImage.TYPE_BYTE_GRAY;  
+					break;  
+				case 3:  
+					type = BufferedImage.TYPE_3BYTE_BGR;  
+					// bgr to rgb  
+					byte b;  
+					for(int i=0; i<data.length; i=i+3) {  
+						b = data[i];  
+						data[i] = data[i+2];  
+						data[i+2] = b;  
+					}  
+					break;  
+				default:  
+					return null;  
+			}  
+			
+			BufferedImage image2 = new BufferedImage(cols, rows, type);  
+	    	image2.getRaster().setDataElements(0, 0, cols, rows, data);  
+	    	return image2;  
+	  }
 	  public static void setHsvColor(Scalar hsvColor)
-	    {
-	    	//my memory is so backwards I just have to swap HSV/VSH and RGB/BGR/RGBA until
-	    	//things make enough sense
+	  {
+		  	//my memory is so backwards I just have to swap HSV/VSH and RGB/BGR/RGBA until
+		  	//things make enough sense
 	    	//sorry
 	    	//-aaron
 	    	
@@ -92,50 +91,51 @@ public class Calibration {
 
 	        //convert to RGB
 	        Imgproc.cvtColor(spectrumHsv, mSpectrum, Imgproc.COLOR_HSV2RGB_FULL, 4);
-	    }
-static org.opencv.core.Point[] toXY(double[] data)
-{
-    double rho, theta;
-    //org.opencv.core.Point
-    org.opencv.core.Point pt1 = new org.opencv.core.Point();
-    org.opencv.core.Point pt2 = new org.opencv.core.Point();
-    //Point pt2 = new Point();
-    double a, b;
-    double x0, y0;
-	//data = pt;
-    rho = data[0];
-    theta = data[1];
-    a = Math.cos(theta);
-    b = Math.sin(theta);
-    x0 = a*rho;
-    y0 = b*rho;
-    pt1.x = (int) Math.round(x0 + 1000*(-b));
-    pt1.y = (int) Math.round(y0 + 1000*a);
-    pt2.x = (int) Math.round(x0 - 1000*(-b));
-    pt2.y = (int) Math.round(y0 - 1000 *a);
-    org.opencv.core.Point[] pts = {pt1,pt2};
-    return pts;
-}
-boolean acceptLinePair(float[] line1, float[] line2, float minTheta)
-{
-    float theta1 = line1[1], theta2 = line2[1];
+	  	}
+	  static org.opencv.core.Point[] toXY(double[] data)
+	  {
+		  double rho, theta;
+		  org.opencv.core.Point pt1 = new org.opencv.core.Point();
+		  org.opencv.core.Point pt2 = new org.opencv.core.Point();
 
-    if(theta1 < minTheta)
-    {
-        theta1 += Math.PI; // dealing with 0 and 180 ambiguities...
-    }
+		  double a, b;
+		  double x0, y0;
+   
+		  rho = data[0];
+		  theta = data[1];
+		  a = Math.cos(theta);
+		  b = Math.sin(theta);
+		  x0 = a*rho;
+		  y0 = b*rho;
+		  pt1.x = (int) Math.round(x0 + 1000*(-b));
+		  pt1.y = (int) Math.round(y0 + 1000*a);
+		  pt2.x = (int) Math.round(x0 - 1000*(-b));
+		  pt2.y = (int) Math.round(y0 - 1000 *a);
+		  org.opencv.core.Point[] pts = {pt1,pt2};
+		  return pts;
+	  }
+	  
+	  boolean acceptLinePair(float[] line1, float[] line2, float minTheta)
+	  {
+		  float theta1 = line1[1], theta2 = line2[1];
 
-    if(theta2 < minTheta)
-    {
-        theta2 += Math.PI; // dealing with 0 and 180 ambiguities...
-    }
+		  if(theta1 < minTheta)
+		  {
+			  theta1 += Math.PI;
+		  }
 
-    return Math.abs(theta1 - theta2) > minTheta;
-}
-static org.opencv.core.Point findIntersection(org.opencv.core.Point line1,org.opencv.core.Point line12,
+		  if(theta2 < minTheta)
+		  {
+			  theta2 += Math.PI; // dealing with 0 and 180 ambiguities...
+		  }
+
+		  return Math.abs(theta1 - theta2) > minTheta;
+	  }
+	  
+	  static org.opencv.core.Point findIntersection(org.opencv.core.Point line1,org.opencv.core.Point line12,
 		  org.opencv.core.Point line2,org.opencv.core.Point line22) {
 		  float xD1,xD2,yD2,xD3,yD3;
-		float yD1;
+		  float yD1;
 		  float dot,deg,len1,len2;
 		  float segmentLen1,segmentLen2;
 		  float ua,ub,div;
@@ -194,156 +194,95 @@ static org.opencv.core.Point findIntersection(org.opencv.core.Point line1,org.op
 
 		  // return the valid intersection
 		  return pt;
-		}
-public static void calibrate()
-{
-	setHsvColor(floorTileHsv);
-	framepanel.setContentPane(calibpanel);
+	}
 
-	//framepanel.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-	System.out.println("Performing calibration");
-	if (Main.capture.isOpened())
+	public static void calibrate()
 	{
-	Mat temp2 = new Mat();
-		Mat shot = new Mat();
-		//Main.capture = new VideoCapture(Main.settings.getDevice()); 
-		while (shot.empty())
+		setHsvColor(floorTileHsv);
+		framepanel.setContentPane(calibpanel);
+		System.out.println("Performing calibration");
+		if (Main.capture.isOpened())
 		{
-			Main.safeRead(shot);
-		}
-		BufferedImage temp=matToBufferedImage(shot);
-		/*
-		MatOfInt params = new MatOfInt();
-		params.push_back(new Mat(org.opencv.highgui.Highgui.CV_IMWRITE_PNG_COMPRESSION));
-
-		params.push_back(new Mat(9));*/
-		//org.opencv.highgui.Highgui.imwrite()
-		try {
-		    // retrieve image
-		    //BufferedImage bi = getMyImage();
-		    File outputfile = new File(Main.settings.fullPath + "calibration.png");
-		    ImageIO.write(temp, "png", outputfile);
-		} catch (IOException e) {
-		    
-		}
-		//org.opencv.highgui.Highgui.imwrite(Main.settings.fullPath + "calib.png", temp2, params);
-		//Main.capture.
-		///BufferedImage temp=matToBufferedImage(shot);
+			Mat temp2 = new Mat();
+			Mat shot = new Mat();
+			while (shot.empty())
+			{
+				Main.safeRead(shot);
+			}
+			BufferedImage temp=matToBufferedImage(shot);
+	
+			try
+			{
+				File outputfile = new File(Main.settings.fullPath + "calibration.png");
+				ImageIO.write(temp, "png", outputfile);
+			} catch (IOException e) {
+				//catch an IOException here??
+			}
 		
-		calibpanel.setImage(temp);
-		framepanel.setSize(new Dimension(temp.getWidth(),temp.getHeight()));
-		framepanel.setVisible(true);
+			calibpanel.setImage(temp);
+			framepanel.setSize(new Dimension(temp.getWidth(),temp.getHeight()));
+			framepanel.setVisible(true);
 		
-		Imgproc.GaussianBlur(shot,temp2, new Size(9,9), 2); //gaussian kernel filter (blur)
+			Imgproc.GaussianBlur(shot,temp2, new Size(9,9), 2); //gaussian kernel filter (blur)
 		
-        Imgproc.cvtColor(temp2,temp2, Imgproc.COLOR_RGB2HSV_FULL); //convert RGB to hsv colorspace
+			Imgproc.cvtColor(temp2,temp2, Imgproc.COLOR_RGB2HSV_FULL); //convert RGB to hsv colorspace
 
-        //Core.inRange(shot, mLowerBound, mUpperBound, shot);
-    	//my computer is fast enough to deal with full-size video
-    	//you may need to use pyrDown once or twice otherwise
-        //ie: Imgproc.pyrDown(rgbaImage, mPyrDownMat);
+			Mat mMask = new Mat();
+			Mat mDilatedMask = new Mat();
+			Mat edges = new Mat();
+			Mat lines = new Mat();
+			Core.inRange(temp2, mLowerBound, mUpperBound, mMask); //threshold between lower/upper HSV bounds
+			Imgproc.dilate(mMask, mDilatedMask, new Mat()); //dilate: reduce "holes" in matte
+			Imgproc.Canny(mDilatedMask, edges, 66.0,133.0);
         
-        /*Imgproc.cvtColor(tmp2, mHsvMat, Imgproc.COLOR_RGB2HSV_FULL); //convert RGB to hsv colorspace
-*/
-        Mat mMask = new Mat();
-        Mat mDilatedMask = new Mat();
-        Mat edges = new Mat();
-        Mat lines = new Mat();
-        Core.inRange(temp2, mLowerBound, mUpperBound, mMask); //threshold between lower/upper HSV bounds
-        Imgproc.dilate(mMask, mDilatedMask, new Mat()); //dilate: reduce "holes" in matte
-        Imgproc.Canny(mDilatedMask, edges, 66.0,133.0);
+			Imgproc.HoughLines( edges, lines, 1, Math.PI/180, 78);
         
-        Imgproc.HoughLines( edges, lines, 1, Math.PI/180, 78);
+			Mat temp3 = new Mat();
+			
+			Imgproc.cvtColor(temp2,temp3,Imgproc.COLOR_HSV2RGB_FULL);
         
-        Mat temp3 = new Mat();
-        //Imgproc.cvtColor(temp2,temp3,Imgproc.COLOR_GRAY2RGB);
-        Imgproc.cvtColor(temp2,temp3,Imgproc.COLOR_HSV2RGB_FULL);
+			ArrayList<org.opencv.core.Point[]> lineList = new ArrayList<org.opencv.core.Point[]>();
         
-        ArrayList<org.opencv.core.Point[]> lineList = new ArrayList<org.opencv.core.Point[]>();
+			double[] data;
+			
+			org.opencv.core.Point pt1 = new org.opencv.core.Point();
+			org.opencv.core.Point pt2 = new org.opencv.core.Point();
         
-        double[] data;
-        double rho, theta;
-        //org.opencv.core.Point
-        org.opencv.core.Point pt1 = new org.opencv.core.Point();
-        org.opencv.core.Point pt2 = new org.opencv.core.Point();
-        //Point pt2 = new Point();
-        double a, b;
-        double x0, y0;
-        Scalar color = new Scalar(0,0,0);
-        for (int i = 0; i < lines.cols(); i++)
-        {
-            data = lines.get(0, i);
-            org.opencv.core.Point[] pts = toXY(data);
-            pt1 = pts[0];
-            pt2 = pts[1];
-            lineList.add(pts);
-            Core.line(temp3,pt1,pt2,color,1);
-            //Core.line(mIntermediateMat, pt1, pt2, color, 3);
-        }
+			Scalar color = new Scalar(0,0,0);
+			for (int i = 0; i < lines.cols(); i++)
+			{
+				data = lines.get(0, i);
+				org.opencv.core.Point[] pts = toXY(data);
+				pt1 = pts[0];
+            	pt2 = pts[1];
+            	lineList.add(pts);
+            	Core.line(temp3,pt1,pt2,color,1);
+			}
         
-        ArrayList<org.opencv.core.Point> intersections = new ArrayList<org.opencv.core.Point>();
+			ArrayList<org.opencv.core.Point> intersections = new ArrayList<org.opencv.core.Point>();
         
-        for (org.opencv.core.Point[] line1 : lineList)
-        {
-        	for (org.opencv.core.Point[] line2 : lineList)
-        	{
-        		org.opencv.core.Point pt = findIntersection(line1[0],line1[1],line2[0],line2[1]);
-        		if (pt!=null)
-        		{
-        			intersections.add(pt);
-        			Core.circle(temp3, pt, 2, new Scalar(255,255,255));
-        		}
-        	}
-        }
-        /*
-        for(int j=0; j< num; j++) {
-            line(p[j*2].x,p[j*2].y, p[j*2+1].x,p[j*2+1].y); 
-            for(int i=0; i< num; i++) if(i!=j) {
-              Point pt=findIntersection(
-                p[i*2],p[i*2+1], p[j*2],p[j*2+1]);
-              if(pt!=null) ellipse(pt.x,pt.y, 14,14);
-            }  
-          }*/
-        /*for( int i = 0; i < lines.cols(); i++ )
-        {
-            for(int j = 0; j < lines.cols(); j++)
-            {
-                org.opencv.core.Point[] line1 = lines[i];
-                org.opencv.core.Point[] line2 = lineList.get(j);
-                if(acceptLinePair(line1, line2, Math.PI / 32))
-                {
-                    org.opencv.core.Point intersection = computeIntersect(line1, line2);
-                    intersections.add(intersection);
-                }
-            }
-
-        }*/
-/*
-        if(intersections.size() > 0)
-        {
-            vector<Point2f>::iterator i;
-            for(i = intersections.begin(); i != intersections.end(); ++i)
-            {
-                cout << "Intersection is " << i->x << ", " << i->y << endl;
-                circle(occludedSquare, *i, 1, Scalar(0, 255, 0), 3);
-            }
-        }*/
-        //Imgproc.HoughLines
-        //Imgproc.cvtColor(mMask,temp2,Imgproc.COLOR_GRAY2RGB);
-        //Imgproc.cvtColor(temp2, temp2, Imgproc.COLOR_HSV2RGB_FULL); 
+			for (org.opencv.core.Point[] line1 : lineList)
+			{
+				for (org.opencv.core.Point[] line2 : lineList)
+				{
+					org.opencv.core.Point pt = findIntersection(line1[0],line1[1],line2[0],line2[1]);
+					if (pt!=null)
+					{
+						intersections.add(pt);
+						Core.circle(temp3, pt, 2, new Scalar(255,255,255));
+					}
+				}
+			}
         
-        //Main.capture.read
-        temp=matToBufferedImage(temp3);
-		calibpanel.setImage(temp);
-		calibpanel.repaint();
-		try {
-		    // retrieve image
-		    //BufferedImage bi = getMyImage();
-		    File outputfile = new File(Main.settings.fullPath + "calibration-parsed.png");
-		    ImageIO.write(temp, "png", outputfile);
-		} catch (IOException e) {
-		    
+			temp=matToBufferedImage(temp3);
+			calibpanel.setImage(temp);
+			calibpanel.repaint();
+			try {
+				File outputfile = new File(Main.settings.fullPath + "calibration-parsed.png");
+				ImageIO.write(temp, "png", outputfile);
+			} catch (IOException e) {
+				//catch this?
+			}
 		}
 	}
-}
 }

@@ -12,48 +12,46 @@ import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
 public class VideoThread implements Runnable {
-	  private static Mat                  mRgba;
-	  public static Scalar               mBlobColorRgba;
-	  public static Scalar               mBlobColorHsv;
-	  private static ColorBlobDetector    mDetector;
-	  private static Mat                  mSpectrum;
-	  private static Scalar               CONTOUR_COLOR;
+	  private static Mat mRgba;
+	  public static Scalar mBlobColorRgba;
+	  public static Scalar mBlobColorHsv;
+	  private static ColorBlobDetector mDetector;
+	  private static Mat mSpectrum;
+	  private static Scalar CONTOUR_COLOR;
 	  
-	  int frame= 0;
+	  int frame = 0;
 	  
-	Panel raw;
-	Panel out;
-	JFrame inframe;
-	JFrame outframe;
-	Thread thread;
-	Mat webcam_image = new Mat();
-	Mat thresh_image = new Mat();
+	  Panel raw;
+	  Panel out;
+	  JFrame inframe;
+	  JFrame outframe;
+	  Thread thread;
+	  Mat webcam_image = new Mat();
+	  Mat thresh_image = new Mat();
 	
-	synchronized void swapDevice(int index)
-	{
-		//capture.
-		if (Main.capture != null)
-		{
-			Main.capture.release();
-		}
-		Main.capture.open(index);
-	}
+	  synchronized void swapDevice(int index)
+	  {
+		  if (Main.capture != null)
+		  {
+			  Main.capture.release();
+		  }
+		  Main.capture.open(index);
+	  }
 	
-	VideoThread(Panel raw, Panel out, JFrame inframe, JFrame outframe) {
-	    this.raw = raw;
-	    this.out = out;
-	    this.inframe=inframe;
-	    this.outframe=outframe;
-	    // Create a new, second thread
-	    thread = new Thread(this, "Demo Thread");
-	    System.out.println("Child thread: " + thread);
-	    mRgba = new Mat(400, 400, CvType.CV_8UC4);
-        mDetector = new ColorBlobDetector();
-        mSpectrum = new Mat();
-        mBlobColorRgba = new Scalar(255,123,26);
-        mBlobColorHsv = new Scalar(107.29,229,255); //79214, 89, 
-        new Size(200, 64);
-        CONTOUR_COLOR = new Scalar(255,0,255,255);
+	  VideoThread(Panel raw, Panel out, JFrame inframe, JFrame outframe) {
+		  this.raw = raw;
+		  this.out = out;
+		  this.inframe=inframe;
+		  this.outframe=outframe;
+		  
+		  thread = new Thread(this, "Video Processing Thread");
+		  System.out.println("Child thread: " + thread);
+		  mRgba = new Mat(400, 400, CvType.CV_8UC4);
+		  mDetector = new ColorBlobDetector();
+		  mSpectrum = new Mat();
+		  mBlobColorRgba = new Scalar(255,123,26);
+		  mBlobColorHsv = new Scalar(107.29,229,255);
+		  CONTOUR_COLOR = new Scalar(255,0,255,255);
 	  }
 
 	void setBlobColor(Scalar Rgba, Scalar Hsv)
@@ -122,46 +120,39 @@ public class VideoThread implements Runnable {
 			        if( !webcam_image.empty() )  
 			         {  
 			        	frame++;
-			           inframe.setSize(webcam_image.width(),webcam_image.height());  
-			           outframe.setSize(webcam_image.width(),webcam_image.height());
-			           temp=matToBufferedImage(webcam_image);  
-			           raw.setImage(temp);  
-			           raw.repaint();  
+			        	inframe.setSize(webcam_image.width(),webcam_image.height());  
+			        	outframe.setSize(webcam_image.width(),webcam_image.height());
+			        	temp=matToBufferedImage(webcam_image);  
+			        	raw.setImage(temp);  
+			        	raw.repaint();  
+			        	
+			        	mRgba = webcam_image.clone();
 			           
-			           //temp=matToBufferedImage(thresh_image);
-			           //mRgba = webcam_image;
-mRgba = webcam_image.clone();
-			           //if (mIsColorSel_ected) {
-			           mDetector.setHsvColor(mBlobColorHsv);
-			               mDetector.process(mRgba);
-			               List<MatOfPoint> contours = mDetector.getContours();
-			               //Log.e(TAG, "Contours count: " + contours.size());
-			               Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR);
+			        	mDetector.setHsvColor(mBlobColorHsv);
+			        	mDetector.process(mRgba);
+			        	List<MatOfPoint> contours = mDetector.getContours();
+			            Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR);
 
-			               Mat colorLabel = mRgba.submat(4, 68, 4, 68);
-			               colorLabel.setTo(mBlobColorRgba);
+			            Mat colorLabel = mRgba.submat(4, 68, 4, 68);
+			            colorLabel.setTo(mBlobColorRgba);
 
-			               Mat spectrumLabel = mRgba.submat(4, 4 + mSpectrum.rows(), 70, 70 + mSpectrum.cols());
-			               mSpectrum.copyTo(spectrumLabel);
-			           //}
-
-			           temp=matToBufferedImage(mRgba);
+			            Mat spectrumLabel = mRgba.submat(4, 4 + mSpectrum.rows(), 70, 70 + mSpectrum.cols());
+			            mSpectrum.copyTo(spectrumLabel);
 			           
-			           //org.opencv.imgproc.Imgproc.threshold(webcam_image, thresh_image, 120, 250, org.opencv.imgproc.Imgproc.THRESH_BINARY);
-			           //temp=matToBufferedImage(thresh_image);
-			           out.setImage(temp);
-			           out.repaint();
-			           //org.opencv.imgproc.Imgproc.
+			            temp=matToBufferedImage(mRgba);
+			           
+			            out.setImage(temp);
+			            out.repaint();
+			           
 			         }  
 			         else  
 			         {  
-			           System.out.println(" --(!) No captured frame -- Break!");  
-			           break;  
+			        	 System.out.println(" --(!) No captured frame -- Break!");  
+			        	 break;  
 			         }  
-			        }  
-			       }  
-			       return;  
-			  //System.out.println("just ran again.");
+			      }  
+			     }  
+			    return;  
 		  }
 	  }
 } 

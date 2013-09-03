@@ -2,24 +2,19 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
-import java.nio.file.Path;
 
-import javax.imageio.ImageIO;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
-import org.opencv.core.Scalar;
 import javax.swing.*;
 public class SettingsFrame extends JFrame {
 	/**
@@ -38,8 +33,8 @@ public class SettingsFrame extends JFrame {
 	JSlider val = new JSlider(JSlider.HORIZONTAL, 0, 255, 90);
 	SliderListen vallisten = new SliderListen(SliderListen.roles.val);*/
 	
-	static public String savePath = "/home/silbernetic/Desktop/tests/";
-	static public String fullPath = "";
+	public String savePath = "/home/silbernetic/Desktop/tests/";
+	public String fullPath = "";
 	
 	Box theBox = Box.createVerticalBox();
 	
@@ -66,14 +61,13 @@ public class SettingsFrame extends JFrame {
 	Component spacingStrut = Box.createVerticalStrut(20);
 	
 	public JComboBox<String> CameraChoice = new JComboBox<String>(choices);
+	
 	SettingsFrame(String title)
 	{
 		super(title);
 		TITLE=title;
 		this.setTitle(TITLE);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  
-		//this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),BoxLayout.Y_AXIS));
-		//this.getContentPane().add(Box.createVerticalGlue());
 		theBox.add(spacingStrut);
 		theBox.add(Box.createVerticalGlue());
 		theBox.add(Box.createVerticalStrut(20));
@@ -82,18 +76,7 @@ public class SettingsFrame extends JFrame {
 		theBox.add(header);
 		theBox.add(subheader);
 		theBox.add(Box.createVerticalStrut(20));
-		//this.getContentPane().setLayout(null);
-		//this.add(hue);
 		
-		/*
-		 * String[] petStrings = { "Bird", "Cat", "Dog", "Rabbit", "Pig" };
-
-//Create the combo box, select item at index 4.
-//Indices start at 0, so 4 specifies the pig.
-JComboBox petList = new JComboBox(petStrings);
-petList.setSelectedIndex(4);
-petList.addActionListener(this);
-		 */
 		CameraChoice.setSelectedIndex(0);
 		
 		theBox.add(testName);
@@ -101,28 +84,23 @@ petList.addActionListener(this);
 		theBox.add(CameraChoice);
 		theBox.add(spacingStrut);
 		
-		//theBox.add(new JLabel("Camera Device"));
 		startCamera.addActionListener(new ActionListener() {
 			 
 			@Override
             public void actionPerformed(ActionEvent e)
             {
                 //Execute when button is pressed
-                //Main.logger.setLogging(true);
-                //System.out.println("Starting camera");
-				if (!Files.exists(java.nio.file.FileSystems.getDefault().getPath(savePath + "/" + testName.getText() + "/"), LinkOption.NOFOLLOW_LINKS))
+            	if (!Files.exists(java.nio.file.FileSystems.getDefault().getPath(savePath + "/" + testName.getText() + "/"), LinkOption.NOFOLLOW_LINKS))
 				{
 					System.out.println("no project dir yet! creating...");
 					try {
 						Files.createDirectory(java.nio.file.FileSystems.getDefault().getPath(savePath + "/" + testName.getText() + "/"));
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 				}
 				else
 				{
-					//Custom button text
 					Object[] options = {"Yes", "NO"};
 					int n = JOptionPane.showOptionDialog(Main.settings,
 						    "Test named '" + testName.getText() + "' exists."
@@ -154,7 +132,7 @@ petList.addActionListener(this);
             public void actionPerformed(ActionEvent e)
             {
                 //Execute when button is pressed
-Calibration.calibrate();
+				Calibration.calibrate();
             }
         });
 		
@@ -166,8 +144,7 @@ Calibration.calibrate();
 		CameraChoice.addActionListener(new ActionListener() {
 		    @Override
 		    public void actionPerformed(ActionEvent evt) {
-		        //changeDevice(getDevice());
-		    	//Calibration.calibrate();
+		        
 		    }
 		});
 		/*
@@ -190,15 +167,10 @@ Calibration.calibrate();
                 //Execute when button is pressed
                 PrintStream out = null;
 				try {
-				    // retrieve image
-				    //BufferedImage bi = getMyImage();
 					String name = Main.settings.fullPath + "data.csv";
-				    File outputfile = new File(name);
-	                //System.out.println(Main.logger.getCSV());
 				    System.out.println("data saved to " + name);
-	                    out = new PrintStream(new FileOutputStream(name));
-	                    out.print(Main.logger.getCSV());
-				    //ImageIO.write(temp, "png", outputfile);
+	                out = new PrintStream(new FileOutputStream(name));
+	                out.print(Main.logger.getCSV());
 				} catch (IOException e2) {
 				    
 				} finally {
@@ -244,8 +216,6 @@ Calibration.calibrate();
 				temp.setAlignmentX(CENTER_ALIGNMENT);
 		}
 		this.pack();
-		//pack();
-		//theBox.add(hue);
 	}
 	void changeDevice(int index)
 	{
@@ -256,10 +226,10 @@ Calibration.calibrate();
 	{
 		return Integer.parseInt(CameraChoice.getSelectedItem().toString());
 	}
-	void updateSliders(Scalar hsv)
+	/*void updateSliders(Scalar hsv)
 	{
-		/*hue.setValue((int) Math.round(hsv.val[0]));
+		hue.setValue((int) Math.round(hsv.val[0]));
 		sat.setValue((int) Math.round(hsv.val[1]));
-		val.setValue((int) Math.round(hsv.val[2]));*/
-	}
+		val.setValue((int) Math.round(hsv.val[2]));
+	}*/
 }

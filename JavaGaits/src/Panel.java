@@ -36,7 +36,7 @@ public class Panel extends JPanel
 		}
 		else
 		{
-			g.fillRect(0, 0, 50,50); //well, a 50x50 square beats null stuff lying around, at least.
+			g.fillRect(0, 0, 50,50); //well, a 50x50 square beats null stuff lying around, at least. right?
 		}
 	}  
 }  
