@@ -13,11 +13,11 @@ import org.opencv.imgproc.Imgproc;
 
 public class VideoThread implements Runnable {
 	  private static Mat mRgba;
-	  public static Scalar mBlobColorRgba;
-	  public static Scalar mBlobColorHsv;
+	  public static Scalar mBlobColorRgba = new Scalar(255,131,38);
+	  public static Scalar mBlobColorHsv =  new Scalar(106.93,218,255);
 	  private static ColorBlobDetector mDetector;
 	  private static Mat mSpectrum;
-	  private static Scalar CONTOUR_COLOR;
+	  private static Scalar CONTOUR_COLOR = new Scalar(255,0,255,255);
 	  
 	  int frame = 0;
 	  
@@ -49,9 +49,6 @@ public class VideoThread implements Runnable {
 		  mRgba = new Mat(400, 400, CvType.CV_8UC4);
 		  mDetector = new ColorBlobDetector();
 		  mSpectrum = new Mat();
-		  mBlobColorRgba = new Scalar(255,123,26);
-		  mBlobColorHsv = new Scalar(107.29,229,255);
-		  CONTOUR_COLOR = new Scalar(255,0,255,255);
 	  }
 
 	void setBlobColor(Scalar Rgba, Scalar Hsv)
@@ -97,6 +94,7 @@ public class VideoThread implements Runnable {
 	
 	  @Override
 	  public void run() {
+      	mDetector.setHsvColor(mBlobColorHsv);
 		  try
 		  {
 				//changeDevice(getDevice());
@@ -128,7 +126,6 @@ public class VideoThread implements Runnable {
 			        	
 			        	mRgba = webcam_image.clone();
 			           
-			        	mDetector.setHsvColor(mBlobColorHsv);
 			        	mDetector.process(mRgba);
 			        	List<MatOfPoint> contours = mDetector.getContours();
 			            Imgproc.drawContours(mRgba, contours, -1, CONTOUR_COLOR);

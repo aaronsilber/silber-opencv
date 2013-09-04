@@ -18,12 +18,11 @@ public class PickingListener implements MouseListener {
 		//determine what color was clicked on: grab frame and get the pixel data
 		BufferedImage clone = Main.inpanel.getImage();
 		Color color = new Color(clone.getRGB(e.getX(), e.getY()),true);
-		float[] hsvf = new float[3];
-		Color.RGBtoHSB(color.getRed(),color.getGreen(),color.getBlue(),hsvf);
-		
+		float[] hsvf = Color.RGBtoHSB(color.getRed(),color.getGreen(),color.getBlue(),null);
 		System.out.println(color.toString()); //debug
 		
-		//create hsv and rgba equivalents (correct?)
+		//create hsv and rgba equivalents (correct?
+		System.out.println("hsvf: " + hsvf.toString());
 		Scalar hsv = new Scalar(hsvf[0]*180, hsvf[1]*255, hsvf[2]*255);
 		Scalar rgba = new Scalar(color.getBlue(),color.getGreen(),color.getRed());
 		

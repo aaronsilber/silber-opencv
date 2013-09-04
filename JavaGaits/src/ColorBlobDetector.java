@@ -19,7 +19,7 @@ public class ColorBlobDetector {
     // Minimum contour area in percent for contours filtering
     private static double mMinContourArea = 0.35;
     // Color radius for range checking in HSV color space
-    private Scalar mColorRadius = new Scalar(100,25,14);
+    private Scalar mColorRadius = new Scalar(50,25,70);
     private Mat mSpectrum = new Mat();
     private List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
 
@@ -36,17 +36,18 @@ public class ColorBlobDetector {
 
     public void setHsvColor(Scalar hsvColor)
     {
-    	//my memory is so backwards I just have to swap HSV/VSH and RGB/BGR/RGBA until
-    	//things make enough sense
-    	//sorry
-    	//-aaron
-    	
+     	
         double minH = (hsvColor.val[0] >= mColorRadius.val[0]) ? hsvColor.val[0]-mColorRadius.val[0] : 0;
         double maxH = (hsvColor.val[0]+mColorRadius.val[0] <= 255) ? hsvColor.val[0]+mColorRadius.val[0] : 255;
 
-        mLowerBound.val[0] = minH;
-        mUpperBound.val[0] = maxH;
-
+        //mLowerBound.val[0] = minH;
+       // mUpperBound.val[0] = maxH;
+        System.out.println("minH: " + minH + " and maxH:" + maxH);
+        mLowerBound.val[0] = 0;
+        mUpperBound.val[0] = 150;
+        // mUpperBound.val[0] = maxH;
+        System.out.println("(hardcoded) minH: " + mLowerBound.val[0] + " and maxH:" + mUpperBound.val[0]);
+        
         mLowerBound.val[1] = hsvColor.val[1] - mColorRadius.val[1];
         mUpperBound.val[1] = hsvColor.val[1] + mColorRadius.val[1];
 
