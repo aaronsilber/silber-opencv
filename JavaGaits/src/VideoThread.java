@@ -14,7 +14,7 @@ import org.opencv.imgproc.Imgproc;
 public class VideoThread implements Runnable {
 	  private static Mat mRgba;
 	  public static Scalar mBlobColorRgba = new Scalar(255,131,38);
-	  public static Scalar mBlobColorHsv =  new Scalar(106.93,218,255);
+	  public static Scalar mBlobColorHsv =  new Scalar(107.93,215,240);
 	  private static ColorBlobDetector mDetector;
 	  private static Mat mSpectrum;
 	  private static Scalar CONTOUR_COLOR = new Scalar(255,0,255,255);

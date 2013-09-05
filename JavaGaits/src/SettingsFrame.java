@@ -184,9 +184,25 @@ public class SettingsFrame extends JFrame {
 			@Override
             public void actionPerformed(ActionEvent e)
             {
+				if (!Calibration.calibrationPerformed)
+				{
+					Object[] options = {"Yes", "NO"};
+					int n = JOptionPane.showOptionDialog(Main.settings,
+							"A calibration image has not been captured."
+									+ "\r\nProceed to begin logging?",
+									"No Calibration Captured",
+									JOptionPane.YES_NO_OPTION,
+									JOptionPane.WARNING_MESSAGE,
+									null, options, options[1]);
+					if (n == JOptionPane.NO_OPTION)
+					{
+						return;
+					}
+				}
                 //Execute when button is pressed
                 Main.logger.setLogging(true);
                 System.out.println("Logging has begun");
+                return;
             }
         });
 		

@@ -30,8 +30,8 @@ public class Calibration {
     // Color radius for range checking in HSV color space
     private static Scalar mColorRadius = new Scalar(280,180,50);
     private static Mat mSpectrum = new Mat();
-    //private List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
-	public static BufferedImage matToBufferedImage(Mat matrix) {  
+	public static boolean calibrationPerformed = false;
+    public static BufferedImage matToBufferedImage(Mat matrix) {  
 			int cols = matrix.cols();  
 			int rows = matrix.rows();  
 			int elemSize = (int)matrix.elemSize();  
@@ -215,6 +215,7 @@ public class Calibration {
 			{
 				File outputfile = new File(Main.settings.fullPath + "calibration.png");
 				ImageIO.write(temp, "png", outputfile);
+				calibrationPerformed = true;
 			} catch (IOException e) {
 				//catch an IOException here??
 			}
