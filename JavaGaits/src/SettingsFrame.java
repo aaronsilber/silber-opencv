@@ -77,7 +77,7 @@ public class SettingsFrame extends JFrame {
 		theBox.add(subheader);
 		theBox.add(Box.createVerticalStrut(20));
 		
-		CameraChoice.setSelectedIndex(0);
+		CameraChoice.setSelectedIndex(1);
 		
 		theBox.add(testName);
 		theBox.add(new JLabel("Camera Device"));
