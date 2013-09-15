@@ -16,7 +16,7 @@ public class VideoThread implements Runnable {
 	  private static Mat mRgba;
 	  public static Scalar mBlobColorRgba = new Scalar(255,131,38);
 	  public static Scalar mBlobColorHsv =  new Scalar(107.93,215,240);
-	  private static ColorBlobDetector mDetector;
+	  private static BlobDetector mDetector;
 	  private static Mat mSpectrum;
 	  private static Scalar CONTOUR_COLOR = new Scalar(255,0,255,255);
 	  
@@ -48,7 +48,7 @@ public class VideoThread implements Runnable {
 		  thread = new Thread(this, "Video Processing Thread");
 		  System.out.println("Child thread: " + thread);
 		  mRgba = new Mat(400, 400, CvType.CV_8UC4);
-		  mDetector = new ColorBlobDetector();
+		  mDetector = new BlobDetector();
 		  mSpectrum = new Mat();
 	  }
 
