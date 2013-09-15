@@ -1,3 +1,4 @@
+package com.aaronthesilber.blobtracker;
 import org.opencv.core.Point;
 
 public class DataFrame {

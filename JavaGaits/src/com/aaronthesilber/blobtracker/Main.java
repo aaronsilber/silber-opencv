@@ -1,3 +1,4 @@
+package com.aaronthesilber.blobtracker;
 import javax.swing.JFrame;
 
 import org.opencv.core.Core;

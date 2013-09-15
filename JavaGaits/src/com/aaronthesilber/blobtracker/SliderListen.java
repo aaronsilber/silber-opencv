@@ -1,3 +1,4 @@
+package com.aaronthesilber.blobtracker;
 /*
  * NOTE!!
  * We don't use sliders any more.

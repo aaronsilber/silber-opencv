@@ -1,3 +1,4 @@
+package com.aaronthesilber.blobtracker;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Iterator;

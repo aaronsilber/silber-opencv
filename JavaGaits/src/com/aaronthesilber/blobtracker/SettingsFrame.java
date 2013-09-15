@@ -1,3 +1,4 @@
+package com.aaronthesilber.blobtracker;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;

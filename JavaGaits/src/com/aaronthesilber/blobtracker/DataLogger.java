@@ -1,3 +1,4 @@
+package com.aaronthesilber.blobtracker;
 import java.util.ArrayList;
 import java.util.Iterator;
 

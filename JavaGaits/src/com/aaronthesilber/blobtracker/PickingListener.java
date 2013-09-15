@@ -1,3 +1,4 @@
+package com.aaronthesilber.blobtracker;
 import java.awt.Color;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;

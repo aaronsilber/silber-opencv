@@ -1,3 +1,4 @@
+package com.aaronthesilber.blobtracker;
 // Import the basic graphics classes.  
  // The problem here is that we read the image with OpenCV into a Mat object.  
  // But OpenCV for java doesn't have the method "imshow", so, we got to use  
