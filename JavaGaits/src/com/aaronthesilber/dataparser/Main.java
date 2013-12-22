@@ -1,0 +1,273 @@
+package com.aaronthesilber.dataparser;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JFrame;
+
+import org.apache.commons.io.IOUtils;
+
+import com.panayotis.gnuplot.JavaPlot;
+import com.panayotis.gnuplot.dataset.FileDataSet;
+import com.panayotis.gnuplot.swing.JPlot;
+
+public class Main {
+
+	/**
+	 * @param args
+	 */
+    /* This demo code displays plot on screen using image terminal */
+    private static JavaPlot JPlotTerminal() {
+        JPlot plot = new JPlot();
+        plot.getJavaPlot().addPlot("sqrt(x)/x");
+        plot.getJavaPlot().addPlot("x*sin(x)");
+        
+        //com.panayotis.gnuplot.dataset.PointDataSet pts2;
+        //com.panayotis.gnuplot.dataset.
+        //plot.getJavaPlot().addPlot(Dataset)
+        //plot.plot();
+        
+        JFrame f = new JFrame();
+        //f.getContentPane().add(plot);
+        f.pack();
+        f.setLocationRelativeTo(null);
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.setVisible(true);
+        
+        return plot.getJavaPlot();
+    }
+    private static ArrayList<Float[]> parseFile(String filename, String id)
+    {
+    	Float maxdist = 0F;
+    	Float lastx=0F, lasty = 0F;
+    	Float finalx = 0F, finaly = 0F;
+    	Float firstx=0F, firsty = 0F;
+    	//JPlotTerminal();
+        ArrayList<Float[]> datapoints = new ArrayList<Float[]>();
+		 try {
+		    FileInputStream inputStream = new FileInputStream(filename);
+		    try {
+		        String everything = IOUtils.toString(inputStream);
+		        String[] lines = everything.split("\r\n");
+	        	Float deltx=0F, delty = 0F;
+	        	Float startval = null;
+	        	Float dist = 0F;
+	        	int linenum = 0;
+	        	
+		        for (String line : lines)
+		        {
+		        	if (linenum==0)
+		        	{
+		        		linenum++;
+		        		continue;
+		        	}
+		        	String[] split = line.split(",");
+		        	Float[] pts = new Float[split.length]; //adjust the size of this array to the num of fields
+		        	int i = 0;
+		        	for (String num : split)
+		        	{
+		        		try
+		        		{
+		        			Float tmp = Float.parseFloat(num);
+		        			boolean breaker = false;
+		        			switch(i)
+		        			{
+		        				case 0:
+		        					if (linenum==1)
+		        					{
+		        						startval = tmp;
+		        					}
+		        					tmp = tmp - startval;
+		        					//timestamp
+		        					break;
+		        				case 1:
+		        					//frame
+		        					break;
+		        				case 2:
+		        					//x_pix
+		        					tmp = tmp / 3.6F; //conversion factor to cm
+		        					if (linenum == 2)
+		        					{
+		        						firstx = tmp;
+		        					}
+		        					deltx = Math.abs(lastx-tmp);
+		        					//System.out.println("lastx was " + lastx + " now " + deltx + " changed");
+		        					lastx = tmp;
+		        					finalx = tmp;
+		        					break;
+		        				case 3:
+		        					//y_pix
+		        					tmp = tmp / 3.6F; //conversion factor to cm
+		        					
+		        					if (linenum == 2)
+		        					{
+		        						firsty = tmp;
+		        					}
+		        					delty = Math.abs(lasty-tmp);
+		        					lasty = tmp;
+		        					finaly = tmp;
+		        					break;
+		        				case 4:
+		        					//computedsqrt - drop this silly field
+		        					dist += (float) Math.sqrt(Math.pow(deltx, 2)+Math.pow(delty,2));
+		        					tmp = dist;
+		        					//breaker=true;
+		        					break;
+	        					default:
+	        						break;
+		        			}
+		        			if (breaker) { continue; }
+		        			pts[i] = tmp;
+		        			//System.out.println(Float.parseFloat(num));
+		        		}
+		        		catch (Exception e)
+		        		{
+		        			System.out.println("exception processing a point");
+		        			e.printStackTrace();
+		        		}
+		        		i++;
+		        	}
+        			//System.out.println("[" + pts[0] + "] " + "lastx,y:" + lastx + "," + lasty + "(" + dist + ")");
+		        	//
+		        	//what to do: compute distance from first x and first y
+		        	//System.out.println(pts[0] + "," + pts[2] + "," + pts[3] + "," + dist + "," + reldist);
+        	     	Float reldist = (float) Math.sqrt(Math.pow(firstx-pts[2],2) + Math.pow(firsty-pts[3], 2));
+        	     	if (reldist > maxdist) { maxdist = reldist; }
+		        	datapoints.add(pts);
+		        	linenum++;
+		        }
+		        
+		       for (Float f : datapoints.get(3))
+		        {
+		        	System.out.println(f.toString());
+		        }
+		       for (int i=0;i<datapoints.size();i++)
+		       {
+		    	   int samp = 3; //sample size, radius
+		    	   if (!(i-samp<0||i+samp>datapoints.size()))
+		    	   {
+			    	   List<Float[]> samples = datapoints.subList(i-samp, i+samp);
+			    	   Float timesum = 0.0F;
+			    	   Float xsum = 0.0F;
+			    	   Float ysum = 0.0F;
+			    	   for (int i2=0;i2<samples.size();i2++)
+			    	   {
+			    		   Float[] f = samples.get(i2);
+			    		   //System.out.println(f.toString());
+			    		   timesum += f[0];
+			    		   xsum += f[2];
+			    		   ysum += f[3];
+			    	   }
+			    	   Float timeavg = timesum / samples.size();
+			    	   Float xavg = xsum / samples.size();
+			    	   Float yavg = ysum / samples.size();
+			    	   System.out.println(timeavg + "," + xavg + "," + yavg);
+		    	   }
+		       }
+		    } finally {
+		        inputStream.close();
+		    }
+		    /*FileInputStream inputStream = new FileInputStream(args[0]);
+		    try {
+		        String everything = IOUtils.toString(inputStream);
+		        System.out.println(everything);
+		        JavaPlot p = new JavaPlot();
+		        p.addPlot(new FileDataSet(new File(args[0])));
+		        p.plot();
+		        //JPlotTerminal(null);
+		    } finally {
+		        inputStream.close();
+		    }*/
+
+		    
+			} catch (Exception e) {
+				System.out.println("FATAL: Exception on file: '" + filename + "'\r\n");
+				e.printStackTrace();
+			}
+     	//Float direction = (float) Math.atan(finaly-firsty/finalx-firstx);
+     	Float direction = (float) Math.toDegrees(Math.atan2(finaly-firsty, finalx-firstx));
+     	Float dist = (float) Math.sqrt(Math.pow(firstx-finalx,2)+Math.pow(firsty-finaly, 2));
+		 System.out.println(id + "," + dist);
+     	return datapoints;
+    }
+	public static void main(String[] args) {
+		/*if (args.length < 1)
+		{
+			System.out.println("Too few arguments!!");
+			return;
+		}*/
+		String[] tests = { "test1-trial1",
+				"test1-trial2",
+				"test1-trial3",
+				"test1-trial4",
+				"test2-trial1",
+				"test2-trial2",
+				"test2-trial3",
+				"test2-trial4",
+				"test3-trial1",
+				"test3-trial2",
+				"test3-trial3",
+				"test3-trial4",
+				"test4-trial1",
+				"test4-trial2",
+				"test4-trial3",
+				"test4-trial4",
+				"test5-trial1",
+				"test5-trial2",
+				"test5-trial3",
+				"test6-trial1",
+				"test6-trial2",
+				"test6-trial3",
+				"test6-trial4",
+				"test7-trial1",
+				"test7-trial2",
+				"test7-trial3",
+				"test7-trial4",
+				"test8-trial1",
+				"test8-trial2",
+				"test8-trial3",
+				"test8-trial4",
+				"test9-trial1",
+				"test9-trial2",
+				"test9-trial3",
+				"test9-trial4",
+				"test10-trial1",
+				"test10-trial2",
+				"test10-trial3",
+				"test10-trial4",
+				"test11-trial1",
+				"test11-trial2",
+				"test11-trial3",
+				"test11-trial4",
+				"test12-trial1",
+				"test12-trial2",
+				"test12-trial3",
+				"test12-trial4",
+				"test13-trial1",
+				"test13-trial2",
+				"test13-trial3",
+				"test13-trial4"};
+		/*
+		 * comment back in for iterative testing
+		int i =0;
+		for (String test : tests)
+		{
+			String filename = "/home/silbernetic/Desktop/tests/" + test + "/data.csv";
+			parseFile(filename, Integer.toString(i));
+			i++;
+		}*/
+		parseFile("/home/silbernetic/Desktop/tests/test4-trial2/data.csv", "1");
+		//String filename = "/home/silbernetic/Desktop/tests/test13-trial2/data.csv";
+		// String filename = args[0];
+		 //parseFile(filename);
+
+	}
+
+}

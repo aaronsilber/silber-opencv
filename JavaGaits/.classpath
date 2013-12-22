@@ -8,5 +8,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/usr/local/share/OpenCV/java/opencv-246.jar"/>
+	<classpathentry kind="lib" path="/home/silbernetic/Downloads/commons-io-2.4/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="/home/silbernetic/Downloads/JavaPlot-0.4.0/dist/JavaPlot.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
