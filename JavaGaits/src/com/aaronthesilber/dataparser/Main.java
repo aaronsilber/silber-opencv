@@ -21,6 +21,7 @@ import com.panayotis.gnuplot.dataset.FileDataSet;
 import com.panayotis.gnuplot.swing.JPlot;
 
 public class Main {
+public static final float distThresh = 2.5F;
 static String logcache = "";
 final static String line_ending = "\n";
 public enum LogDestination {
@@ -64,10 +65,12 @@ static final String logFilenameBase = "/home/silbernetic/Desktop/testoutputs/";
     }
     private static ArrayList<Float[]> parseFile(String filename, String id)
     {
+    	boolean startTrigger = false;
     	Float maxdist = 0F;
     	Float lastx=0F, lasty = 0F;
     	Float finalx = 0F, finaly = 0F;
     	Float firstx=0F, firsty = 0F;
+    	Float startval = 0F;
     	//JPlotTerminal();
         ArrayList<Float[]> datapoints = new ArrayList<Float[]>();
 		 try {
@@ -76,7 +79,6 @@ static final String logFilenameBase = "/home/silbernetic/Desktop/testoutputs/";
 		        String everything = IOUtils.toString(inputStream);
 		        String[] lines = everything.split("\r\n");
 	        	Float deltx=0F, delty = 0F;
-	        	Float startval = null;
 	        	Float dist = 0F;
 	        	int linenum = 0;
 	        	
@@ -162,8 +164,23 @@ static final String logFilenameBase = "/home/silbernetic/Desktop/testoutputs/";
         	     	if (reldist > maxdist) { maxdist = reldist; }
         	     	pts[5] = (float) Math.sqrt(Math.pow(firstx-pts[2],2) + Math.pow(firsty-pts[3],2));
         	     	//this is: timestamp, x, y, dist, computed_val_1
-        	     	logline(pts[0] + "," + pts[2] + "," + pts[3] + "," + pts[4] + "," + pts[5]);
-		        	datapoints.add(pts);
+        	     	if (pts[5] < distThresh && !startTrigger) //checking if it has moved less than "3"
+        	     	{
+        	     		logcache = ""; //reset the log
+        	     		//logHeader(id); //add a new header
+        	     	}
+        	     	else if (startTrigger)
+        	     	{
+        	     		datapoints.add(pts);
+            	     	logline(pts[0] + "," + pts[2] + "," + pts[3] + "," + pts[4] + "," + pts[5]);
+        	     	}
+        	     	else if (pts[5] > distThresh && !startTrigger && linenum > 4) //first line to be logged properly
+        	     	{
+        	     		//reset the timestamp
+        	     		startval += pts[0];
+        	     		//datapoints.add(pts);
+        	     		startTrigger = true;
+        	     	}
 		        	linenum++;
 		        }
 		        
@@ -297,7 +314,7 @@ static final String logFilenameBase = "/home/silbernetic/Desktop/testoutputs/";
 		PrintWriter writer;
 		try {
 			id = String.format("%3s", id).replace(' ','0');
-			logcache = id + "\n" + logcache;
+			logHeader(id);
 			writer = new PrintWriter(logFilenameBase + id + ".csv", "UTF-8");
 			writer.print(logcache);
 			writer.close();
@@ -311,6 +328,10 @@ static final String logFilenameBase = "/home/silbernetic/Desktop/testoutputs/";
 			// this sucks because it means your system does not support UTF-8
 			e.printStackTrace();
 		}
+	}
+	static void logHeader(String id)
+	{
+		logcache = id + "\n" + logcache;
 	}
 
 }
