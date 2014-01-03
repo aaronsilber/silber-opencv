@@ -19,11 +19,27 @@ import com.panayotis.gnuplot.dataset.FileDataSet;
 import com.panayotis.gnuplot.swing.JPlot;
 
 public class Main {
-
+static String logcache = "";
+final static String line_ending = "\n";
+public enum LogDestination {
+	STDOUT,FILE,PLOT,NONE
+}
+static final LogDestination LOG_OUTPUT = LogDestination.STDOUT;
 	/**
 	 * @param args
 	 */
-    /* This demo code displays plot on screen using image terminal */
+	private static void logline(String line)
+	{
+		if (LOG_OUTPUT == LogDestination.STDOUT)
+		{
+			System.out.println(line);
+		}
+		else
+		{
+			logcache = logcache + line + line_ending;
+		}
+	}
+/* This demo code displays plot on screen using image terminal */
     private static JavaPlot JPlotTerminal() {
         JPlot plot = new JPlot();
         plot.getJavaPlot().addPlot("sqrt(x)/x");
@@ -98,7 +114,7 @@ public class Main {
 		        						firstx = tmp;
 		        					}
 		        					deltx = Math.abs(lastx-tmp);
-		        					//System.out.println("lastx was " + lastx + " now " + deltx + " changed");
+		        					//logline("lastx was " + lastx + " now " + deltx + " changed");
 		        					lastx = tmp;
 		        					finalx = tmp;
 		        					break;
@@ -125,19 +141,19 @@ public class Main {
 		        			}
 		        			if (breaker) { continue; }
 		        			pts[i] = tmp;
-		        			//System.out.println(Float.parseFloat(num));
+		        			//logline(Float.parseFloat(num));
 		        		}
 		        		catch (Exception e)
 		        		{
-		        			System.out.println("exception processing a point");
+		        			logline("exception processing a point");
 		        			e.printStackTrace();
 		        		}
 		        		i++;
 		        	}
-        			//System.out.println("[" + pts[0] + "] " + "lastx,y:" + lastx + "," + lasty + "(" + dist + ")");
+        			//logline("[" + pts[0] + "] " + "lastx,y:" + lastx + "," + lasty + "(" + dist + ")");
 		        	//
 		        	//what to do: compute distance from first x and first y
-		        	//System.out.println(pts[0] + "," + pts[2] + "," + pts[3] + "," + dist + "," + reldist);
+		        	//logline(pts[0] + "," + pts[2] + "," + pts[3] + "," + dist + "," + reldist);
         	     	Float reldist = (float) Math.sqrt(Math.pow(firstx-pts[2],2) + Math.pow(firsty-pts[3], 2));
         	     	if (reldist > maxdist) { maxdist = reldist; }
 		        	datapoints.add(pts);
@@ -146,7 +162,7 @@ public class Main {
 		        
 		       for (Float f : datapoints.get(3))
 		        {
-		        	System.out.println(f.toString());
+		        	logline(f.toString());
 		        }
 		       for (int i=0;i<datapoints.size();i++)
 		       {
@@ -160,7 +176,7 @@ public class Main {
 			    	   for (int i2=0;i2<samples.size();i2++)
 			    	   {
 			    		   Float[] f = samples.get(i2);
-			    		   //System.out.println(f.toString());
+			    		   //logline(f.toString());
 			    		   timesum += f[0];
 			    		   xsum += f[2];
 			    		   ysum += f[3];
@@ -168,7 +184,7 @@ public class Main {
 			    	   Float timeavg = timesum / samples.size();
 			    	   Float xavg = xsum / samples.size();
 			    	   Float yavg = ysum / samples.size();
-			    	   System.out.println(timeavg + "," + xavg + "," + yavg);
+			    	   logline(timeavg + "," + xavg + "," + yavg);
 		    	   }
 		       }
 		    } finally {
@@ -177,7 +193,7 @@ public class Main {
 		    /*FileInputStream inputStream = new FileInputStream(args[0]);
 		    try {
 		        String everything = IOUtils.toString(inputStream);
-		        System.out.println(everything);
+		        logline(everything);
 		        JavaPlot p = new JavaPlot();
 		        p.addPlot(new FileDataSet(new File(args[0])));
 		        p.plot();
@@ -188,19 +204,19 @@ public class Main {
 
 		    
 			} catch (Exception e) {
-				System.out.println("FATAL: Exception on file: '" + filename + "'\r\n");
+				logline("FATAL: Exception on file: '" + filename + "'\r\n");
 				e.printStackTrace();
 			}
      	//Float direction = (float) Math.atan(finaly-firsty/finalx-firstx);
      	Float direction = (float) Math.toDegrees(Math.atan2(finaly-firsty, finalx-firstx));
      	Float dist = (float) Math.sqrt(Math.pow(firstx-finalx,2)+Math.pow(firsty-finaly, 2));
-		 System.out.println(id + "," + dist);
+		 logline(id + "," + dist);
      	return datapoints;
     }
 	public static void main(String[] args) {
 		/*if (args.length < 1)
 		{
-			System.out.println("Too few arguments!!");
+			logline("Too few arguments!!");
 			return;
 		}*/
 		String[] tests = { "test1-trial1",
