@@ -21,9 +21,11 @@ import com.panayotis.gnuplot.dataset.FileDataSet;
 import com.panayotis.gnuplot.swing.JPlot;
 
 public class Main {
-public static final float distThresh = 2.5F; //threshold of movement above which the robot has begun moving
+public static final float distThresh = 1F; //threshold of movement above which the robot has begun moving
 public static final float maxDuration = 30000F; // maximum length for any test to run
+public static final boolean logsInMemory = true; //boolean controlling whether to store a variable of all logs recorded
 static String logcache = "";
+static ArrayList<String> logs = new ArrayList<String>();
 final static String line_ending = "\n";
 public enum LogDestination {
 	STDOUT,FILE,PLOT,NONE
@@ -298,9 +300,63 @@ static final String logFilenameBase = "/home/silbernetic/Desktop/testoutputs/";
 		for (String test : tests)
 		{
 			String filename = "/home/silbernetic/Desktop/tests/" + test + "/data.csv";
-			parseFile(filename, Integer.toString(i));
-			if (LOG_OUTPUT == LogDestination.FILE) fileLog(Integer.toString(i));
+			//parseFile(filename, Integer.toString(i));
+			parseFile(filename, test);
+			if (LOG_OUTPUT == LogDestination.FILE) fileLog(test);
 			i++;
+		}
+		
+		ArrayList<String> averagedLogs = new ArrayList<String>();
+		ArrayList<float[][]> summedLogs = new ArrayList<float[][]>();
+		int logNum = 0;
+		String currentLogId = "";
+		float[][] logSum = null;
+		for (String fullLog : logs)
+		{
+			//split all lines
+			String[] lines = fullLog.split("\n");
+			//line 1 is our id
+			String testId = lines[0];
+			System.out.println("Attempting to process log " + testId);
+			
+			int lineNum = 0;
+			for (String line : lines)
+			{
+				if (logSum == null)
+				{
+					logSum = new float[lines.length*2][3];
+				}
+				if (lineNum == 0)
+				{
+					currentLogId = line;
+					lineNum++;
+					continue;
+				}
+				String points[] = line.split(",");
+				//logSum[lineNum][0] += Float.parseFloat(points[0]);
+				logSum[lineNum][0] = Float.parseFloat(points[0]);
+				logSum[lineNum][1] += Float.parseFloat(points[4]);
+				logSum[lineNum][2]++;
+				lineNum++;
+			}
+			//sum until the next one won't be same test
+			logNum++;
+			if (logNum >= logs.size()) continue;
+			//System.out.println(currentLogId.indexOf("-"));
+			if (!logs.get(logNum).substring(0,currentLogId.length()).startsWith(currentLogId.substring(0,currentLogId.indexOf("-"))))
+			{
+				logcache = "";
+				//logHeader(currentLogId.substring(0,currentLogId.indexOf("-")) + "mean");
+				//wipe summed so far and package and export
+				for (int i1=0;i1<logSum.length;i1++)
+				{
+					//logSum[i1][0] = logSum[i1][0]/logSum[i1][2]; //disabled averaging of timestamp
+					logSum[i1][1] = logSum[i1][1]/logSum[i1][2];
+					if (logSum[i1][0] != 0F) logline(logSum[i1][0] + "," + logSum[i1][1]);
+					//System.out.println()
+				}
+				fileLog(currentLogId.substring(0,currentLogId.indexOf("-")) + "mean");
+			}
 		}
 		//single file testing
 		//parseFile("/home/silbernetic/Desktop/tests/test11-trial3/data.csv", "1"); // was trial2
@@ -319,9 +375,12 @@ static final String logFilenameBase = "/home/silbernetic/Desktop/testoutputs/";
 			writer = new PrintWriter(logFilenameBase + id + ".csv", "UTF-8");
 			writer.print(logcache);
 			writer.close();
+			if (logsInMemory && !id.endsWith("mean"))
+			{
+				logs.add(logcache);
+			}
 			System.out.println("Looks like the file was written properly! [File ID '" + id + "']");
 			logcache = "";
-			
 		} catch (FileNotFoundException e) {
 			// uh, wrong filename bro?
 			e.printStackTrace();
