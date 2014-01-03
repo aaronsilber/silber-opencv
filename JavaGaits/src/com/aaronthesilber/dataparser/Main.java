@@ -288,7 +288,6 @@ static final String logFilename = "/home/silbernetic/Desktop/testoutput.csv";
 		 //parseFile(filename);
 		if (LOG_OUTPUT == LogDestination.FILE) fileLog();
 	}
-	
 	static void fileLog()
 	{
 		PrintWriter writer;
