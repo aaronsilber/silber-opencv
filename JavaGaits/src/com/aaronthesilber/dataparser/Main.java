@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -24,7 +26,8 @@ final static String line_ending = "\n";
 public enum LogDestination {
 	STDOUT,FILE,PLOT,NONE
 }
-static final LogDestination LOG_OUTPUT = LogDestination.STDOUT;
+static final LogDestination LOG_OUTPUT = LogDestination.FILE;
+static final String logFilename = "/home/silbernetic/Desktop/testoutput.csv";
 	/**
 	 * @param args
 	 */
@@ -283,7 +286,23 @@ static final LogDestination LOG_OUTPUT = LogDestination.STDOUT;
 		//String filename = "/home/silbernetic/Desktop/tests/test13-trial2/data.csv";
 		// String filename = args[0];
 		 //parseFile(filename);
-
+		if (LOG_OUTPUT == LogDestination.FILE) fileLog();
+	}
+	static void fileLog()
+	{
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter(logFilename, "UTF-8");
+			writer.print(logcache);
+			writer.close();
+			System.out.println("Looks like the file was written properly!");
+		} catch (FileNotFoundException e) {
+			// uh, wrong filename bro?
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// this sucks because it means your system does not support UTF-8
+			e.printStackTrace();
+		}
 	}
 
 }
