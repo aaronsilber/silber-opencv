@@ -11,3 +11,8 @@ Features?
 * Tracks a (usually blue) blob (usually a circle) in real-time
 * Records this data to CSV for processing with anything else
 * Experimental and unpolished
+
+Depends:
+* apache commons-io 2.4
+* JavaPlot gnuplot interface (not currently used)
+* opencv 2.4.6 compiled with Java bindings + V4L2

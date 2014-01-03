@@ -88,7 +88,7 @@ static final String logFilename = "/home/silbernetic/Desktop/testoutput.csv";
 		        		continue;
 		        	}
 		        	String[] split = line.split(",");
-		        	Float[] pts = new Float[split.length]; //adjust the size of this array to the num of fields
+		        	Float[] pts = new Float[split.length+1]; //adjust the size of this array to the num of fields
 		        	int i = 0;
 		        	for (String num : split)
 		        	{
@@ -108,6 +108,7 @@ static final String logFilename = "/home/silbernetic/Desktop/testoutput.csv";
 		        					break;
 		        				case 1:
 		        					//frame
+		        					//breaker = true;
 		        					break;
 		        				case 2:
 		        					//x_pix
@@ -159,14 +160,13 @@ static final String logFilename = "/home/silbernetic/Desktop/testoutput.csv";
 		        	//logline(pts[0] + "," + pts[2] + "," + pts[3] + "," + dist + "," + reldist);
         	     	Float reldist = (float) Math.sqrt(Math.pow(firstx-pts[2],2) + Math.pow(firsty-pts[3], 2));
         	     	if (reldist > maxdist) { maxdist = reldist; }
+        	     	pts[5] = (float) Math.sqrt(Math.pow(firstx-pts[2],2) + Math.pow(firsty-pts[3],2));
+        	     	//this is: timestamp, x, y, dist, computed_val_1
+        	     	logline(pts[0] + "," + pts[2] + "," + pts[3] + "," + pts[4] + "," + pts[5]);
 		        	datapoints.add(pts);
 		        	linenum++;
 		        }
 		        
-		       for (Float f : datapoints.get(3))
-		        {
-		        	logline(f.toString());
-		        }
 		       for (int i=0;i<datapoints.size();i++)
 		       {
 		    	   int samp = 3; //sample size, radius
@@ -187,7 +187,7 @@ static final String logFilename = "/home/silbernetic/Desktop/testoutput.csv";
 			    	   Float timeavg = timesum / samples.size();
 			    	   Float xavg = xsum / samples.size();
 			    	   Float yavg = ysum / samples.size();
-			    	   logline(timeavg + "," + xavg + "," + yavg);
+			    	   //logline(timeavg + "," + xavg + "," + yavg);
 		    	   }
 		       }
 		    } finally {
@@ -213,7 +213,7 @@ static final String logFilename = "/home/silbernetic/Desktop/testoutput.csv";
      	//Float direction = (float) Math.atan(finaly-firsty/finalx-firstx);
      	Float direction = (float) Math.toDegrees(Math.atan2(finaly-firsty, finalx-firstx));
      	Float dist = (float) Math.sqrt(Math.pow(firstx-finalx,2)+Math.pow(firsty-finaly, 2));
-		 logline(id + "," + dist);
+		//logline(id + "," + dist);
      	return datapoints;
     }
 	public static void main(String[] args) {
@@ -282,8 +282,8 @@ static final String logFilename = "/home/silbernetic/Desktop/testoutput.csv";
 			parseFile(filename, Integer.toString(i));
 			i++;
 		}*/
-		parseFile("/home/silbernetic/Desktop/tests/test4-trial2/data.csv", "1");
-		//String filename = "/home/silbernetic/Desktop/tests/test13-trial2/data.csv";
+		parseFile("/home/silbernetic/Desktop/tests/test11-trial3/data.csv", "1"); // was trial2
+		//String filename = "/home/silbernetic/Desktop/tests/test2-trial2/data.csv";
 		// String filename = args[0];
 		 //parseFile(filename);
 		if (LOG_OUTPUT == LogDestination.FILE) fileLog();
