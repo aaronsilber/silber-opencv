@@ -21,7 +21,8 @@ import com.panayotis.gnuplot.dataset.FileDataSet;
 import com.panayotis.gnuplot.swing.JPlot;
 
 public class Main {
-public static final float distThresh = 2.5F;
+public static final float distThresh = 2.5F; //threshold of movement above which the robot has begun moving
+public static final float maxDuration = 30000F; // maximum length for any test to run
 static String logcache = "";
 final static String line_ending = "\n";
 public enum LogDestination {
@@ -169,7 +170,7 @@ static final String logFilenameBase = "/home/silbernetic/Desktop/testoutputs/";
         	     		logcache = ""; //reset the log
         	     		//logHeader(id); //add a new header
         	     	}
-        	     	else if (startTrigger)
+        	     	else if (startTrigger && pts[0] <= maxDuration)
         	     	{
         	     		datapoints.add(pts);
             	     	logline(pts[0] + "," + pts[2] + "," + pts[3] + "," + pts[4] + "," + pts[5]);
