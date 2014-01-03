@@ -27,7 +27,7 @@ public enum LogDestination {
 	STDOUT,FILE,PLOT,NONE
 }
 static final LogDestination LOG_OUTPUT = LogDestination.FILE;
-static final String logFilename = "/home/silbernetic/Desktop/testoutput.csv";
+static final String logFilenameBase = "/home/silbernetic/Desktop/testoutputs/";
 	/**
 	 * @param args
 	 */
@@ -275,28 +275,35 @@ static final String logFilename = "/home/silbernetic/Desktop/testoutput.csv";
 				"test13-trial4"};
 		/*
 		 * comment back in for iterative testing
+		 * */
 		int i =0;
 		for (String test : tests)
 		{
 			String filename = "/home/silbernetic/Desktop/tests/" + test + "/data.csv";
 			parseFile(filename, Integer.toString(i));
+			if (LOG_OUTPUT == LogDestination.FILE) fileLog(Integer.toString(i));
 			i++;
-		}*/
-		parseFile("/home/silbernetic/Desktop/tests/test11-trial3/data.csv", "1"); // was trial2
+		}
+		//single file testing
+		//parseFile("/home/silbernetic/Desktop/tests/test11-trial3/data.csv", "1"); // was trial2
+		
 		//String filename = "/home/silbernetic/Desktop/tests/test2-trial2/data.csv";
 		// String filename = args[0];
 		 //parseFile(filename);
-		if (LOG_OUTPUT == LogDestination.FILE) fileLog();
 	}
 	
-	static void fileLog()
+	static void fileLog(String id)
 	{
 		PrintWriter writer;
 		try {
-			writer = new PrintWriter(logFilename, "UTF-8");
+			id = String.format("%3s", id).replace(' ','0');
+			logcache = id + "\n" + logcache;
+			writer = new PrintWriter(logFilenameBase + id + ".csv", "UTF-8");
 			writer.print(logcache);
 			writer.close();
-			System.out.println("Looks like the file was written properly!");
+			System.out.println("Looks like the file was written properly! [File ID '" + id + "']");
+			logcache = "";
+			
 		} catch (FileNotFoundException e) {
 			// uh, wrong filename bro?
 			e.printStackTrace();
