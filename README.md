@@ -16,3 +16,7 @@ Depends:
 * apache commons-io 2.4
 * JavaPlot gnuplot interface (not currently used)
 * opencv 2.4.6 compiled with Java bindings + V4L2
+* gnuplot wxt terminal (gnuplot-x11 in Debian)
+
+Recommended:
+* eclipse
